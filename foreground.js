@@ -1,18 +1,19 @@
 window.lGetEventListeners = window.getEventListeners; //For some reason, getEventListeners is not available unless we do this.
 console.log(lGetEventListeners);
+
 function boolxor(bit, mask) {
     return mask ? bit : !bit;
 }
 
-function waitForElm(selector, removal = false) {
+function waitForCond(condfunc) {
     return new Promise(resolve => {
-        if (boolxor(document.querySelector(selector), removal)) {
-            return resolve(document.querySelector(selector));
+        if (condfunc()) {
+            return resolve(condfunc());
         }
 
         const observer = new MutationObserver(mutations => {
-            if (boolxor(document.querySelector(selector), removal)) {
-                resolve(document.querySelector(selector));
+            if (condfunc()) {
+                resolve(condfunc());
                 observer.disconnect();
             }
         });
@@ -24,19 +25,73 @@ function waitForElm(selector, removal = false) {
     });
 }
 
-let container = null;
+let continue_container_selector = "#content > div > div:nth-child(1) > div > div > div:nth-child(2) > div > div > div";
+let question_container_selector = "#content > div > div:nth-child(1) > div > div > div:nth-child(2) > div > div";
 
-function answersfromquestiondom(elem) {
+function reactprops(elem) {
     for (let o in elem) {
         if (o.startsWith("__reactProps")) {
-            return _.cloneDeep(elem[o].children[1].props.answers);
+            return elem[o]
         }
     }
 }
 
-waitForElm(".enter-done").then(elem => {
-    answersfromquestiondom(elem)
-    container = elem.parentElement
-})
-// some thing that seems to be anticheat
-document.removeEventListener("click", lGetEventListeners(document).click[1].listener)
+function answer() {
+    let Qholder = document.querySelector(question_container_selector);
+    let props = reactprops(Qholder);
+    let handler = props.children[1].props.onQuestionAnswered;
+    let answers = props.children[1].props.answers;
+    let correctid = answers.find(obj => {
+        return obj.correct === true
+    })._id;
+    handler(correctid)
+}
+
+function cont() {
+    let Qholder = document.querySelector(continue_container_selector);
+    let props = reactprops(Qholder);
+    let handler = props.children[1].props.actions[1].handleClick;
+    handler();
+}
+
+async function anscont() {
+    // wait for function to exist
+    let qcont = await waitForCond(() => {
+        try {
+            let Qholder = document.querySelector(question_container_selector);
+            let props = reactprops(Qholder);
+            let handler = props.children[1].props.onQuestionAnswered;
+            return typeof handler === "function";
+        } catch(e) {
+            return false
+        }
+    });
+    // call it
+    answer(qcont);
+    // wait for function to exist
+    let ccont = await waitForCond(() => {
+        try {
+            let Qholder = document.querySelector(continue_container_selector);
+            let props = reactprops(Qholder);
+            let handler = props.children[1].props.actions[1].handleClick;
+            return typeof handler === "function";
+        } catch(e) {
+            return false
+        }
+    });
+    // call it
+    cont(ccont);
+}
+
+function gimkitclick(elem) {
+    // getEventListeners only works in chrome console
+    window.getEventListeners(document.getElementById("root")).click.forEach(listener => {
+        listener.listener({
+            type: "click",
+            view: window,
+            isTrusted: true,
+            path: [elem],
+            target: elem,
+        })
+    });
+}
