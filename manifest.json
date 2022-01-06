@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "GimKit Lock-pick",
+  "description": "Crack GimKit wide open",
+  "version": "0.0.1",
+  "permissions": [
+    "webRequest"
+  ],
+  "host_permissions": [
+    "ws://*.gimkitconnect.com/*",
+    "wss://*.gimkitconnect.com/*",
+    "*://*.gimkit.com/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "injector.js"
+      ],
+      "matches": [
+        "*://*.gimkit.com/*"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "e.js",
+        "foreground.js"
+      ],
+      "matches": [
+        "*://*.gimkit.com/*"
+      ]
+    }
+  ]
+}
