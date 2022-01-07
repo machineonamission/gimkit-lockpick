@@ -1,1 +1,0 @@
-window.ReactTestUtils = require('react-dom/test-utils');
