@@ -29,8 +29,6 @@ function waitForCond(condfunc) {
     });
 }
 
-let continue_container_selector = "#content > div > div:nth-child(1) > div > div > div:nth-child(2) > div > div > div";
-let question_container_selector = "#content > div > div:nth-child(1) > div > div > div:nth-child(2) > div > div";
 
 function reactprops(elem) {
     if (elem && elem.props) {
@@ -47,8 +45,14 @@ function reactprops(elem) {
     return null
 }
 
+function answertest(pr) {
+    return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
+}
+
 function answer() {
-    let props = reactsearch(pr=>{return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"});
+    // get question container properties
+    let props = reactsearch(answertest)[0].props;
+    // handler to answer question
     let handler = props.onQuestionAnswered;
     // Q answers
     let answers = props.answers;
@@ -71,11 +75,15 @@ function answer() {
 
 }
 
+function conttest(pr) {
+    return typeof pr.continueToQuestions === "function"
+}
+
 function cont() {
-    let Qholder = document.querySelector(continue_container_selector);
-    let props = reactprops(Qholder).children[1].props;
-    let handler = props.actions[1].handleClick;
-    handler();
+    // find function
+    let props = reactsearch(conttest)[0].props;
+    // call it
+    props.continueToQuestions();
 }
 
 async function anscont() {
@@ -83,27 +91,13 @@ async function anscont() {
     await sleep(500);
     // wait for function to exist
     let qcont = await waitForCond(() => {
-        try {
-            let Qholder = document.querySelector(question_container_selector);
-            let props = reactprops(Qholder);
-            let handler = props.children[1].props.onQuestionAnswered;
-            return typeof handler === "function";
-        } catch (e) {
-            return false
-        }
+        return 0 < reactsearch(answertest).length
     });
     // call it
     answer(qcont);
     // wait for function to exist
     let ccont = await waitForCond(() => {
-        try {
-            let Qholder = document.querySelector(continue_container_selector);
-            let props = reactprops(Qholder);
-            let handler = props.children[1].props.actions[1].handleClick;
-            return typeof handler === "function";
-        } catch (e) {
-            return false
-        }
+        return 0 < reactsearch(conttest).length
     });
     // call it
     cont(ccont);
@@ -113,16 +107,19 @@ async function anscont() {
 function reactsearch(proptest) {
     // run proptest() on all react properties and return property objects for all who return true
     // totally inefficient but very dynamic
+    // takes 1~13ms depending on hardware, since theres 500ms min delay anyways this probably shouldnt matter
+    // if using to
     function test(p) {
         if (p && typeof p === "object" && typeof p.props === "object")
             return proptest(p.props)
         else
             return false
     }
+
     let porps = [];
     Array.from(document.getElementById("root").getElementsByTagName('*')).forEach(e => {
         let props = reactprops(e);
-        if (props.children) {
+        if (props && props.children) {
             if (props && props.children && typeof props.children === "object" && props.children.length) {
                 return Array.from(props.children).forEach(e => {
                     if (test(e)) {
@@ -161,3 +158,5 @@ function gimkitclick(elem) {
 function drawgameanswer() {
     return reactprops(document.querySelector("#content > div > div:nth-child(1) > div > div > div > div>div>div>div:nth-child(2)")).children.props.term
 }
+
+// TODO: fiber.parent goes UP a node, make ✨ new ✨ search function using this
