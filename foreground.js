@@ -45,6 +45,15 @@ function reactprops(elem) {
     return null
 }
 
+function reactfiber(elem) {
+    for (let o in elem) {
+        if (o.startsWith("__reactFiber")) {
+            return elem[o]
+        }
+    }
+    return null
+}
+
 function answertest(pr) {
     return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
 }
@@ -105,41 +114,41 @@ async function anscont() {
 
 
 function reactsearch(proptest) {
-    // run proptest() on all react properties and return property objects for all who return true
-    // totally inefficient but very dynamic
-    // takes 1~13ms depending on hardware, since theres 500ms min delay anyways this probably shouldnt matter
-    // if using to
-    function test(p) {
-        if (p && typeof p === "object" && typeof p.props === "object")
-            return proptest(p.props)
-        else
-            return false
+    // search all fibers for a specific property which is passed to proptest(), return all which return true
+    const searchid = crypto.randomUUID(); // give this search a random ID to assign to searched fibers
+    // run proptest() on all react fibers and return property objects for all who return true
+    function searchfiber(fiber) {
+        if (!fiber) return false;
+        // this is WAY faster than adding them to a local list
+        if (fiber.searchid === searchid) return false;
+        if (!fiber.memoizedProps || typeof fiber.memoizedProps !== "object") return false;
+        try {
+            if (proptest(fiber.memoizedProps)) matches.push(fiber.memoizedProps);
+        } catch (e) {
+
+        } finally {
+            fiber.searchid = searchid
+        }
     }
 
-    let porps = [];
+    let matches = [];
     Array.from(document.getElementById("root").getElementsByTagName('*')).forEach(e => {
-        let props = reactprops(e);
-        if (props && props.children) {
-            if (props && props.children && typeof props.children === "object" && props.children.length) {
-                return Array.from(props.children).forEach(e => {
-                    if (test(e)) {
-                        porps.push(e)
-                        return true;
-                    }
-                    return false
-                })
-            } else {
-                if (test(props.children)) {
-                    porps.push(props.children)
-                    return true;
-                }
-                return false
-            }
-        } else {
-            return false
-        }
+        // search all html element's fibers
+        let fiber = reactfiber(e);
+        if (!fiber) return false;
+        searchfiber(fiber);
+        // some fibers don't have html elements and traversing down with fiber.child can fail. use fiber.return which
+        // goes up and always works to get almost all fibers
+        do {
+            if(!fiber.return) break;
+            fiber = fiber.return;
+            // if this fiber has been searched, its parents have been too.
+            if (fiber.searchid === searchid) break;
+            searchfiber(fiber);
+
+        } while (fiber.return);
     })
-    return porps
+    return matches
 }
 
 function gimkitclick(elem) {
@@ -158,5 +167,8 @@ function gimkitclick(elem) {
 function drawgameanswer() {
     return reactprops(document.querySelector("#content > div > div:nth-child(1) > div > div > div > div>div>div>div:nth-child(2)")).children.props.term
 }
-
-// TODO: fiber.parent goes UP a node, make ✨ new ✨ search function using this
+// let gopts = reactsearch((e) => {return typeof e.value.phaser === "object"})[1].value
+// camera lock: gopts.phaser.scene.cameras.main._bounds (obj)
+// camera zoom: gopts.phaser.scene.cameras.main.zoom = 0.1 (float)
+// position: gopts.phaser.mainCharacter.body (.x, .y) (float)
+// disable collission: gopts.phaser.mainCharacter.body.body.checkCollision.none = true
