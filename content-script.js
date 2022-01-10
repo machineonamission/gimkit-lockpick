@@ -11,12 +11,14 @@ injectscript("foreground.js")
 
 
 chrome.runtime.onConnect.addListener((port) => {
+    // pass message straight to window
     function onportmessage(data) {
         return window.postMessage(data);
     }
 
     port.onMessage.addListener(onportmessage)
 
+    // if its from the window, pass straight to popup
     function onwindowmessage(evt) {
         if (evt.data.me === "receiver") {
             port.postMessage(evt.data)
@@ -24,9 +26,8 @@ chrome.runtime.onConnect.addListener((port) => {
     }
 
     window.addEventListener("message", onwindowmessage);
-    // unregister on port disconnect
+    // unregister events on port disconnect
     port.onDisconnect.addListener(port => {
-        console.log("disconnect sadly")
         port.onMessage.removeListener(onportmessage)
         window.removeEventListener("message", onwindowmessage)
     })

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "GimKit Lock-pick",
+  "name": "GimKit Lock-Pick",
   "description": "Crack GimKit wide open",
   "version": "0.0.1",
   "action": {
@@ -14,7 +14,7 @@
     "128": "logo128.png",
     "1000": "logo.png"
   },
-  "permissions": ["declarativeContent"],
+  "permissions": ["declarativeContent", "storage"],
   "host_permissions": [
     "*://*.gimkit.com/*"
   ],

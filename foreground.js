@@ -1,7 +1,3 @@
-function boolxor(bit, mask) {
-    return mask ? bit : !bit;
-}
-
 const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
@@ -12,7 +8,7 @@ function waitForCond(condfunc) {
             return resolve(condfunc());
         }
 
-        const observer = new MutationObserver(mutations => {
+        const observer = new MutationObserver(() => {
             if (condfunc()) {
                 resolve(condfunc());
                 observer.disconnect();
@@ -176,10 +172,11 @@ function gamemode() {
     if (!ginfo.length) return "ERROR"
     ginfo = ginfo[0].value
     if (ginfo.gameOptions) {
-        // assignments have no special type
+        // assignments have no special type and appear to only be the classic mode which makes sense
         if (ginfo.gameOptions.type === "assignment") return "MC"
         switch (ginfo.gameOptions.specialGameType[0]) {
             // MC: CLASSIC, TEAMS, IMPOSTER, HUMAN_ZOMBIE_DEFENDING_HOMEBASE, LAVA, THANOS, RICH, BOSS_BATTLE, HIDDEN, DRAINED
+            // all of these gamemodes use the same interface as classic
             case "CLASSIC":
             case "TEAMS":
             case "IMPOSTER":
@@ -195,12 +192,15 @@ function gamemode() {
             case "DRAW":
                 return "DRAW"
             default:
+                // this will probably cause problems in the future but idk if i want to set it to UNKNOWN
                 return ginfo.gameOptions.specialGameType[0];
         }
     } else {
         if (ginfo.worldOptions && ginfo.worldOptions.itemOptions) {
             // i cant find anything that specifically says fishtopia, so im searching items for bait in case
             // they reuse the framework for future games. hopefully bait is unique to this game
+
+            // separate from MC because there is potential for fishtopia unique hacks like teleportation
             if (ginfo.worldOptions.itemOptions.some(o => o.id === "bait")) return "FISH"
         }
     }
@@ -208,17 +208,22 @@ function gamemode() {
 }
 
 window.addEventListener("message", (event) => {
-    if (event.data.id && event.data.data && event.data.me === "sender") {
+    // gimkit sends messages too, make sure events have the data we need and are from the popup
+    if (event.data.id && event.data.type && event.data.me === "sender") {
+        // makes it more readable, this is NOT a promise
         function resolve(msg) {
+            // the listener will recieve this message, the receiver thing makes it so it knows to ignore
             window.postMessage({me: "receiver", data: msg, "id": event.data.id})
         }
 
-        switch (event.data.data) {
+        switch (event.data.type) {
             case "ping":
-                console.log("GimKit Lockpick recieved ping, sending pong!")
+                // debug for now, may remove but i find it fun
+                console.log("GimKit Lock Pick received ping, sending pong!")
                 resolve("pong")
                 break
             case "mode":
+                // get gamemode
                 resolve(gamemode())
                 break
         }
