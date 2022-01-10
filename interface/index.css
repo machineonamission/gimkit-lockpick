@@ -1,3 +1,15 @@
 body {
     min-width: 300px;
 }
+
+img.icon {
+    display: inline-block;
+    vertical-align: bottom;
+    height: 1em;
+}
+#title {
+    line-height: 1;
+}
+p {
+    margin-bottom: 0.25em;
+}

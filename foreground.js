@@ -1,6 +1,3 @@
-window.lGetEventListeners = window.getEventListeners; //For some reason, getEventListeners is not available unless we do this.
-console.log(lGetEventListeners);
-
 function boolxor(bit, mask) {
     return mask ? bit : !bit;
 }
@@ -60,7 +57,7 @@ function answertest(pr) {
 
 function answer() {
     // get question container properties
-    let props = reactsearch(answertest)[0].props;
+    let props = reactsearch(answertest)[0];
     // handler to answer question
     let handler = props.onQuestionAnswered;
     // Q answers
@@ -90,7 +87,7 @@ function conttest(pr) {
 
 function cont() {
     // find function
-    let props = reactsearch(conttest)[0].props;
+    let props = reactsearch(conttest)[0];
     // call it
     props.continueToQuestions();
 }
@@ -140,7 +137,7 @@ function reactsearch(proptest) {
         // some fibers don't have html elements and traversing down with fiber.child can fail. use fiber.return which
         // goes up and always works to get almost all fibers
         do {
-            if(!fiber.return) break;
+            if (!fiber.return) break;
             fiber = fiber.return;
             // if this fiber has been searched, its parents have been too.
             if (fiber.searchid === searchid) break;
@@ -164,11 +161,66 @@ function gimkitclick(elem) {
     });
 }
 
-function drawgameanswer() {
-    return reactprops(document.querySelector("#content > div > div:nth-child(1) > div > div > div > div>div>div>div:nth-child(2)")).children.props.term
-}
+
 // let gopts = reactsearch((e) => {return typeof e.value.phaser === "object"})[1].value
 // camera lock: gopts.phaser.scene.cameras.main._bounds (obj)
 // camera zoom: gopts.phaser.scene.cameras.main.zoom = 0.1 (float)
 // position: gopts.phaser.mainCharacter.body (.x, .y) (float)
 // disable collission: gopts.phaser.mainCharacter.body.body.checkCollision.none = true
+
+function gamemode() {
+    // find the "MobXProvider" object which contains lots of game info that is very useful for this function
+    let ginfo = reactsearch((e) => {
+        return (typeof e.value.gameOptions === "object") || (typeof e.value.worldOptions === "object")
+    })
+    if (!ginfo.length) return "ERROR"
+    ginfo = ginfo[0].value
+    if (ginfo.gameOptions) {
+        // assignments have no special type
+        if (ginfo.gameOptions.type === "assignment") return "MC"
+        switch (ginfo.gameOptions.specialGameType[0]) {
+            // MC: CLASSIC, TEAMS, IMPOSTER, HUMAN_ZOMBIE_DEFENDING_HOMEBASE, LAVA, THANOS, RICH, BOSS_BATTLE, HIDDEN, DRAINED
+            case "CLASSIC":
+            case "TEAMS":
+            case "IMPOSTER":
+            case "HUMAN_ZOMBIE_DEFENDING_HOMEBASE":
+            case "LAVA":
+            case "THANOS":
+            case "RICH":
+            case "BOSS_BATTLE":
+            case "HIDDEN":
+            case "DRAINED":
+                return "MC"
+            // other: DRAW
+            case "DRAW":
+                return "DRAW"
+            default:
+                return ginfo.gameOptions.specialGameType[0];
+        }
+    } else {
+        if (ginfo.worldOptions && ginfo.worldOptions.itemOptions) {
+            // i cant find anything that specifically says fishtopia, so im searching items for bait in case
+            // they reuse the framework for future games. hopefully bait is unique to this game
+            if (ginfo.worldOptions.itemOptions.some(o => o.id === "bait")) return "FISH"
+        }
+    }
+    return "UNKNOWN"
+}
+
+window.addEventListener("message", (event) => {
+    if (event.data.id && event.data.data && event.data.me === "sender") {
+        function resolve(msg) {
+            window.postMessage({me: "receiver", data: msg, "id": event.data.id})
+        }
+
+        switch (event.data.data) {
+            case "ping":
+                console.log("GimKit Lockpick recieved ping, sending pong!")
+                resolve("pong")
+                break
+            case "mode":
+                resolve(gamemode())
+                break
+        }
+    }
+}, false);
