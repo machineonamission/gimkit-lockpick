@@ -12,28 +12,33 @@ function askwindow(port, type, params = {}) {
 
         // send message to content script and wait for response
         port.onMessage.addListener(om)
-        port.postMessage(
-            {
-                id: id, // id which will be sent back so we can resolve the right query
-                type: type, data: params, // event data
-                me: "sender" // content script passes message straight to window and the window.onmessage triggers on
-                // content-script fired events and window fired events so we need to differentiate
-            }
-        )
+        port.postMessage({
+            id: id, // id which will be sent back so we can resolve the right query
+            type: type, data: params, // event data
+            me: "sender" // content script passes message straight to window and the window.onmessage triggers on
+            // content-script fired events and window fired events so we need to differentiate
+        })
     }))
 }
 
+let port
 chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
     try {
-        let port = chrome.tabs.connect(tabs[0].id);
+        port = chrome.tabs.connect(tabs[0].id);
         askwindow(port, "ping").then(console.log);
         askwindow(port, "mode").then(mode => {
             let cont = document.getElementById("content");
+            let md = null;
             switch (mode) {
+                case "FISH":
                 case "MC":
                 case "DRAW":
-                case "FISH":
-                    cont.innerHTML = `<p><i class="fa-solid fa-circle-info"></i> Detected type: ${mode}</p>`;
+                    md = mode;
+                    const hnames = {"FISH": "Fishtopia", "MC": "Classic", "DRAW": "Draw That"}
+                    document.getElementById("content").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
+                    new bootstrap.Tooltip(document.getElementById("game-info"), {
+                        "title": "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
+                    })
                     break
                 case "ERROR":
                     cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> I cannot determine what game is loaded. If you are in a game, please report this to the GitHub.</p>`;
@@ -44,11 +49,124 @@ chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                     cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> GimKit appears to have loaded a game, but I cannot identify what it is. If you are in a game, please report this to the GitHub.</p>`;
                     break
             }
-
+            enableaccordion(mode);
+            initvalues()
         });
     } catch (e) {
         console.error(e)
-        document.getElementById("content").innerHTML =
-            `<p class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Something went wrong connecting to GimKit.</p>`
+        document.getElementById("content").innerHTML = `<p class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Something went wrong connecting to GimKit.</p>`
     }
 });
+
+function enableaccordion(mode) {
+    let fish, mc, draw = false;
+    switch (mode) {
+        case "FISH":
+            fish = true;
+        case "MC":
+            mc = true;
+            break;
+        case "DRAW":
+            draw = true;
+    }
+    const warning = `<p class="text-warning"><i class="fa-solid fa-circle-question"></i> GimKit Lock-Pick did not detect that the current game is compatible with these settings. These most likely won't do anything.</p>`
+    if (!mc) {
+        document.querySelector("#mc-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#mc-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
+    if (!fish) {
+        document.querySelector("#fish-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#fish-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
+    if (!draw) {
+        document.querySelector("#draw-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#draw-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
+
+
+    document.getElementById("options").classList.remove("d-none")
+}
+
+function linksliderandnumber(slider, number) {
+    // when slider is changed, change text value
+    slider.addEventListener("input", () => {
+        number.value = slider.value
+    })
+    // when text value is changed
+    number.addEventListener("input", () => {
+        // parse min max and val (text)
+        const min = parseInt(number.getAttribute("min"))
+        const max = parseInt(number.getAttribute("max"))
+        const val = parseInt(number.value)
+        // assert correct values
+        if (val < min) {
+            slider.value = min
+            number.value = min
+            number.dispatchEvent(new Event("input"));
+        } else if (val > max) {
+            slider.value = max
+            number.value = max
+            number.dispatchEvent(new Event("input"));
+        } else {
+            slider.value = val
+        }
+
+    });
+}
+
+function initvalues() {
+    // init special settings
+    const mindelay = document.getElementById('min-delay')
+    const mindelaytext = document.getElementById('min-delay-text')
+    linksliderandnumber(mindelay, mindelaytext)
+    new bootstrap.Tooltip(document.querySelector("#danger-delay-div > label"), {
+        "title": "GimKit listens for unnaturally fast answering and answering too many questions faster than 2/s will get you kicked."
+    })
+    const dangerdelay = document.getElementById("danger-delay")
+    dangerdelay.addEventListener("input", () => {
+        [mindelay, mindelaytext].forEach(e => {
+            const min = dangerdelay.checked ? 0 : 500
+            e.setAttribute("min", min.toString())
+            if (parseInt(e.value) < min) e.value = min.toString()
+        })
+    })
+    // general chrome-stored elements
+    let storagequery = {}
+    document.querySelectorAll('[storage-key]').forEach(e => {
+        const key = e.getAttribute("storage-key")
+        storagequery[key] = e.getAttribute("type") === "checkbox" ? e.checked : e.value;
+    })
+    chrome.storage.local.get(storagequery, items => {
+        askwindow(port, "updatevalue", items)
+        for (const [key, value] of Object.entries(items)) {
+            let objs = document.querySelectorAll(`[storage-key="${key}"]`);
+            if (!objs) return;
+            objs.forEach(obj => {
+                if (obj.getAttribute("type") === "checkbox") {
+                    obj.checked = value;
+                    obj.addEventListener("input", () => {
+                        askwindow(port, "updatevalue", {[key]: obj.checked})
+                        chrome.storage.local.set({[key]: obj.checked})
+                    })
+                } else {
+                    obj.value = value;
+                    obj.addEventListener("input", () => {
+                        askwindow(port, "updatevalue", {[key]: obj.value})
+                        chrome.storage.local.set({[key]: obj.value})
+                    })
+                }
+            })
+
+        }
+    })
+    // button triggers
+    document.querySelectorAll('[trigger]').forEach(e => {
+        const key = e.getAttribute("trigger")
+        e.addEventListener("click", () => {
+            askwindow(port, "trigger", key)
+        })
+    })
+}

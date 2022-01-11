@@ -1,5 +1,5 @@
 body {
-    min-width: 300px;
+    min-width: 400px;
 }
 
 img.icon {
@@ -7,9 +7,23 @@ img.icon {
     vertical-align: bottom;
     height: 1em;
 }
+
 #title {
     line-height: 1;
 }
+
 p {
     margin-bottom: 0.25em;
+}
+
+.accordion-button-muted {
+    color: #888;
+}
+
+.accordion-button-muted:not(.collapsed) {
+    color: #325172;
+}
+
+#min-delay {
+    height: 100%;
 }

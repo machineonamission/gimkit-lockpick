@@ -1,3 +1,6 @@
+let gksettings = {}
+let gkanswering = false;
+
 const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
@@ -16,14 +19,14 @@ function waitForCond(condfunc) {
         });
 
         observer.observe(document.body, {
-            childList: true,
-            subtree: true
+            childList: true, subtree: true
         });
     });
 }
 
 
 function reactprops(elem) {
+    // superceded by reactfiber().memoizedProps
     if (elem && elem.props) {
         return elem.props
     }
@@ -89,22 +92,26 @@ function cont() {
 }
 
 async function anscont() {
-    // sleep
-    await sleep(500);
+    // if cont button exists
+    if (0 < reactsearch(conttest).length) {
+        // click it
+        cont()
+    }
     // wait for function to exist
-    let qcont = await waitForCond(() => {
+    await waitForCond(() => {
         return 0 < reactsearch(answertest).length
     });
     // call it
-    answer(qcont);
+    answer();
     // wait for function to exist
-    let ccont = await waitForCond(() => {
+    await waitForCond(() => {
         return 0 < reactsearch(conttest).length
     });
     // call it
-    cont(ccont);
+    cont();
+    // sleep
+    await sleep(gksettings.delay);
 }
-
 
 function reactsearch(proptest) {
     // search all fibers for a specific property which is passed to proptest(), return all which return true
@@ -148,11 +155,7 @@ function gimkitclick(elem) {
     // getEventListeners only works in chrome console
     window.getEventListeners(document.getElementById("root")).click.forEach(listener => {
         listener.listener({
-            type: "click",
-            view: window,
-            isTrusted: true,
-            path: [elem],
-            target: elem,
+            type: "click", view: window, isTrusted: true, path: [elem], target: elem,
         })
     });
 }
@@ -187,6 +190,7 @@ function gamemode() {
             case "BOSS_BATTLE":
             case "HIDDEN":
             case "DRAINED":
+            case "PARDY": // very fancy but uses the same interface
                 return "MC"
             // other: DRAW
             case "DRAW":
@@ -207,6 +211,26 @@ function gamemode() {
     return "UNKNOWN"
 }
 
+// functions called by buttons
+const triggers = {
+    answerall: async () => {
+        gkanswering = true;
+        while (gkanswering) {
+            await anscont()
+        }
+    }, answerone: () => {
+        // if cont button exists
+        if (0 < reactsearch(conttest).length) {
+            // click it
+            cont()
+        }
+        //answer
+        answer()
+    }, cancel: () => {
+        gkanswering = false;
+    }
+}
+// handle messages from the extension
 window.addEventListener("message", (event) => {
     // gimkit sends messages too, make sure events have the data we need and are from the popup
     if (event.data.id && event.data.type && event.data.me === "sender") {
@@ -216,16 +240,31 @@ window.addEventListener("message", (event) => {
             window.postMessage({me: "receiver", data: msg, "id": event.data.id})
         }
 
-        switch (event.data.type) {
+        const type = event.data.type;
+        const data = event.data.data;
+        console.debug(event.data)
+        switch (type) {
             case "ping":
                 // debug for now, may remove but i find it fun
-                console.log("GimKit Lock Pick received ping, sending pong!")
+                console.log("GimKit Lock-Pick is connected!")
                 resolve("pong")
                 break
             case "mode":
                 // get gamemode
                 resolve(gamemode())
                 break
+            case "updatevalue":
+                // set config var
+                for (const [key, value] of Object.entries(data)) {
+                    gksettings[key] = value;
+                }
+                break;
+            case "trigger":
+                // call specific function
+                triggers[data]();
+                break
+            default:
+                console.warn("Unknown message from GimKit Lock-Pick", event.data)
         }
     }
 }, false);

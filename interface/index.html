@@ -6,16 +6,89 @@
     <link rel="stylesheet" href="bootstrap.min.css">
     <link rel="stylesheet" href="font-awesome-pro-v6-6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="index.css">
-    <script src="bootstrap.bundle.min.js"></script>
 </head>
 <body>
 <div class="m-2">
-    <h1 id="title"><img class="icon" src="../logowhite.png" alt=""> Gimkit Lock Pick</h1>
+    <h1 id="title"><img class="icon" src="../logowhite.png" alt=""> Gimkit Lock-Pick</h1>
     <div id="content">
         <p><i class="fa-solid fa-spinner-third fa-spin"></i> Loading...</p>
     </div>
-
+    <div class="accordion d-none" id="options">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="mc-options">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mc-options-body" aria-expanded="false" aria-controls="mc-options-body">
+                    <span><i class="fa-solid fa-ballot"></i> Classic Mode</span>
+                </button>
+            </h2>
+            <div id="mc-options-body" class="accordion-collapse collapse" aria-labelledby="mc-options">
+                <div class="accordion-body">
+                    <div class="d-grid gap-2">
+                        <label for="min-delay" class="form-label mb-0"><i class="fa-solid fa-timer"></i> Minimum delay
+                            between answering (in ms)</label>
+                        <div class="row g-3">
+                            <div class="col-8">
+                                <input id="min-delay" type="range" class="form-range" min="500" max="5000" step="1"
+                                       value="500" storage-key="delay">
+                            </div>
+                            <div class="col-4">
+                                <input id="min-delay-text" type="number" class="form-control" min="500" max="5000"
+                                       step="1"
+                                       aria-label="Minimum delay between answering (in ms)" value="500"
+                                       storage-key="delay">
+                            </div>
+                        </div>
+                        <div class="form-check form-switch" id="danger-delay-div">
+                            <input class="form-check-input" type="checkbox" id="danger-delay" storage-key="danger">
+                            <label class="form-check-label text-warning" for="danger-delay"><i
+                                    class="fa-solid fa-triangle-exclamation"></i> Unrestrict minimum delay</label>
+                        </div>
+                        <button class="btn btn-success" type="button" trigger="answerall">Auto-answer all</button>
+                        <button class="btn btn-primary" type="button" trigger="answerone">Auto-answer one</button>
+                        <button class="btn btn-danger" type="button" trigger="cancel">Cancel answering</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="fish-options">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#fish-options-body" aria-expanded="false" aria-controls="fish-options-body">
+                    <span><i class="fa-solid fa-fish"></i> Fishtopia</span>
+                </button>
+            </h2>
+            <div id="fish-options-body" class="accordion-collapse collapse" aria-labelledby="fish-options">
+                <div class="accordion-body">
+                    <strong>This is the second item's accordion body.</strong> It is hidden by default, until the
+                    collapse plugin adds the appropriate classes that we use to style each element. These classes
+                    control the overall appearance, as well as the showing and hiding via CSS transitions. You can
+                    modify any of this with custom CSS or overriding our default variables. It's also worth noting that
+                    just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit
+                    overflow.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="draw-options">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#draw-options-body" aria-expanded="false" aria-controls="draw-options-body">
+                    <span><i class="fa-solid fa-pen-line"></i> Draw It</span>
+                </button>
+            </h2>
+            <div id="draw-options-body" class="accordion-collapse collapse" aria-labelledby="draw-options">
+                <div class="accordion-body">
+                    <strong>This is the third item's accordion body.</strong> It is hidden by default, until the
+                    collapse plugin adds the appropriate classes that we use to style each element. These classes
+                    control the overall appearance, as well as the showing and hiding via CSS transitions. You can
+                    modify any of this with custom CSS or overriding our default variables. It's also worth noting that
+                    just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit
+                    overflow.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script src="bootstrap.bundle.min.js"></script>
 <script src="index.js"></script>
 </body>
 </html>
