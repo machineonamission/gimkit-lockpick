@@ -113,7 +113,7 @@ async function anscont() {
     await sleep(gksettings.delay);
 }
 
-function reactsearch(proptest) {
+function reactsearch(proptest, returnentirefiber = false) {
     // search all fibers for a specific property which is passed to proptest(), return all which return true
     const searchid = crypto.randomUUID(); // give this search a random ID to assign to searched fibers
     // run proptest() on all react fibers and return property objects for all who return true
@@ -123,7 +123,14 @@ function reactsearch(proptest) {
         if (fiber.searchid === searchid) return false;
         if (!fiber.memoizedProps || typeof fiber.memoizedProps !== "object") return false;
         try {
-            if (proptest(fiber.memoizedProps)) matches.push(fiber.memoizedProps);
+            if (proptest(fiber.memoizedProps)) {
+                if (returnentirefiber) {
+                    matches.push(fiber);
+                } else {
+                    matches.push(fiber.memoizedProps);
+                }
+
+            }
         } catch (e) {
 
         } finally {
@@ -183,6 +190,15 @@ async function amongus() {
         }
     }
     // engine.game.send("IMPOSTER_MODE_REQUEST_PEOPLE", undefined)
+}
+
+function drawb64(data) {
+    const canv = reactsearch((e) => {
+        return (e.canEdit === true && typeof e.canvasRef === "object")
+    })[0]
+    canv.emitImage(data);
+    canv.canvasRef.current.drawImage(data);
+    return true
 }
 
 // let gopts = reactsearch((e) => {return typeof e.value.phaser === "object"})[1].value
@@ -280,6 +296,9 @@ window.addEventListener("message", (event) => {
                 break
             case "imposters":
                 amongus().then(resolve)
+                break
+            case "draw":
+                resolve(drawb64(data))
                 break
             case "updatevalue":
                 // set config var

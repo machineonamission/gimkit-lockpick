@@ -124,10 +124,11 @@ function linksliderandnumber(slider, number) {
             slider.value = min
             number.value = min
             number.dispatchEvent(new Event("input"));
-        } else if (val > max) {
-            slider.value = max
-            number.value = max
-            number.dispatchEvent(new Event("input"));
+            // dont actually care but like lol
+            // } else if (val > max) {
+            //     slider.value = max
+            //     number.value = max
+            //     number.dispatchEvent(new Event("input"));
         } else {
             slider.value = val
         }
@@ -170,6 +171,18 @@ function initvalues() {
                           </li>`)
             })
         })
+    })
+    // canvas upload
+    const fileupload = document.getElementById("draw-file")
+    const filebutton = document.getElementById("draw-upload")
+    filebutton.addEventListener("click", () => {
+        let file = fileupload.files[0]
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            askwindow(port, "draw", e.target.result)
+        }
+        reader.readAsDataURL(file);
     })
     // general chrome-stored elements
     let storagequery = {}

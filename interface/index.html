@@ -43,13 +43,13 @@
                             <label class="form-check-label text-warning" for="danger-delay"><i
                                     class="fa-solid fa-triangle-exclamation"></i> Unrestrict minimum delay</label>
                         </div>
-                        <button class="btn btn-success" type="button" trigger="answerall"><i
+                        <button class="btn btn-block btn-success" type="button" trigger="answerall"><i
                                 class="fa-solid fa-check-double"></i> Auto-answer all
                         </button>
-                        <button class="btn btn-primary" type="button" trigger="answerone"><i
+                        <button class="btn btn-block btn-primary" type="button" trigger="answerone"><i
                                 class="fa-solid fa-check"></i> Auto-answer one
                         </button>
-                        <button class="btn btn-danger" type="button" trigger="cancel"><i class="fa-solid fa-xmark"></i>
+                        <button class="btn btn-block btn-danger" type="button" trigger="cancel"><i class="fa-solid fa-xmark"></i>
                             Cancel answering
                         </button>
                     </div>
@@ -93,17 +93,19 @@
             <h2 class="accordion-header" id="draw-options">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#draw-options-body" aria-expanded="false" aria-controls="draw-options-body">
-                    <span><i class="fa-solid fa-pen-line"></i> Draw It</span>
+                    <span><i class="fa-solid fa-pen-line"></i> Draw That</span>
                 </button>
             </h2>
             <div id="draw-options-body" class="accordion-collapse collapse" aria-labelledby="draw-options">
                 <div class="accordion-body">
-                    <strong>This is the third item's accordion body.</strong> It is hidden by default, until the
-                    collapse plugin adds the appropriate classes that we use to style each element. These classes
-                    control the overall appearance, as well as the showing and hiding via CSS transitions. You can
-                    modify any of this with custom CSS or overriding our default variables. It's also worth noting that
-                    just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit
-                    overflow.
+                    <div class="d-grid gap-2">
+                        <input class="form-control" type="file" id="draw-file" accept="image/*">
+                        <label for="draw-file" class="form-label">
+                            <button class="btn btn-block btn-primary" type="button" id="draw-upload">
+                                <i class="fa-solid fa-pen-swirl"></i> Draw File on Canvas
+                            </button>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
