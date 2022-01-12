@@ -43,9 +43,15 @@
                             <label class="form-check-label text-warning" for="danger-delay"><i
                                     class="fa-solid fa-triangle-exclamation"></i> Unrestrict minimum delay</label>
                         </div>
-                        <button class="btn btn-success" type="button" trigger="answerall">Auto-answer all</button>
-                        <button class="btn btn-primary" type="button" trigger="answerone">Auto-answer one</button>
-                        <button class="btn btn-danger" type="button" trigger="cancel">Cancel answering</button>
+                        <button class="btn btn-success" type="button" trigger="answerall"><i
+                                class="fa-solid fa-check-double"></i> Auto-answer all
+                        </button>
+                        <button class="btn btn-primary" type="button" trigger="answerone"><i
+                                class="fa-solid fa-check"></i> Auto-answer one
+                        </button>
+                        <button class="btn btn-danger" type="button" trigger="cancel"><i class="fa-solid fa-xmark"></i>
+                            Cancel answering
+                        </button>
                     </div>
                 </div>
             </div>
@@ -59,12 +65,27 @@
             </h2>
             <div id="fish-options-body" class="accordion-collapse collapse" aria-labelledby="fish-options">
                 <div class="accordion-body">
-                    <strong>This is the second item's accordion body.</strong> It is hidden by default, until the
-                    collapse plugin adds the appropriate classes that we use to style each element. These classes
-                    control the overall appearance, as well as the showing and hiding via CSS transitions. You can
-                    modify any of this with custom CSS or overriding our default variables. It's also worth noting that
-                    just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit
-                    overflow.
+
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="imposter-options">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#imposter-options-body" aria-expanded="false"
+                        aria-controls="imposter-options-body">
+                    <span><i class="fa-solid fa-user-astronaut"></i> Trust No One</span>
+                </button>
+            </h2>
+            <div id="imposter-options-body" class="accordion-collapse collapse" aria-labelledby="draw-options">
+                <div class="accordion-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-block btn-success" type="button" id="amongusroles"><i
+                                class="fa-solid fa-user-tag"></i> View All Roles
+                        </button>
+                        <ul id="amongusrolesbody" class="list-group">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

@@ -160,6 +160,30 @@ function gimkitclick(elem) {
     });
 }
 
+async function amongus() {
+    // get all roles for amogus mode
+    let ginfo = reactsearch((e) => {
+        return (typeof e.value.imposter === "object")
+    })
+    ginfo = ginfo[0].value
+    let people = _.cloneDeep(ginfo.imposter.people);
+    // people might not be loaded especially when rejoining
+    if (people.length) { // if loaded return gracefully
+        return people
+    } else {
+        // if not loaded, ask for people and wait until it resolves
+        ginfo.engine.game.send("IMPOSTER_MODE_REQUEST_PEOPLE", undefined)
+        // send returns undefined and has no easy way to intercept callback
+        while (true) {
+            people = _.cloneDeep(ginfo.imposter.people);
+            if (people.length) {
+                return people
+            }
+            await sleep(100)
+        }
+    }
+    // engine.game.send("IMPOSTER_MODE_REQUEST_PEOPLE", undefined)
+}
 
 // let gopts = reactsearch((e) => {return typeof e.value.phaser === "object"})[1].value
 // camera lock: gopts.phaser.scene.cameras.main._bounds (obj)
@@ -182,7 +206,6 @@ function gamemode() {
             // all of these gamemodes use the same interface as classic
             case "CLASSIC":
             case "TEAMS":
-            case "IMPOSTER":
             case "HUMAN_ZOMBIE_DEFENDING_HOMEBASE":
             case "LAVA":
             case "THANOS":
@@ -192,6 +215,8 @@ function gamemode() {
             case "DRAINED":
             case "PARDY": // very fancy but uses the same interface
                 return "MC"
+            case "IMPOSTER":
+                return "IMPOSTER"
             // other: DRAW
             case "DRAW":
                 return "DRAW"
@@ -253,6 +278,9 @@ window.addEventListener("message", (event) => {
                 // get gamemode
                 resolve(gamemode())
                 break
+            case "imposters":
+                amongus().then(resolve)
+                break
             case "updatevalue":
                 // set config var
                 for (const [key, value] of Object.entries(data)) {
@@ -261,7 +289,12 @@ window.addEventListener("message", (event) => {
                 break;
             case "trigger":
                 // call specific function
-                triggers[data]();
+                let r = triggers[data]();
+                if (r && typeof r.then === "function") { // promise
+                    r.then(resolve)
+                } else {
+                    return r
+                }
                 break
             default:
                 console.warn("Unknown message from GimKit Lock-Pick", event.data)

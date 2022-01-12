@@ -33,8 +33,14 @@ chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 case "FISH":
                 case "MC":
                 case "DRAW":
+                case "IMPOSTER":
                     md = mode;
-                    const hnames = {"FISH": "Fishtopia", "MC": "Classic", "DRAW": "Draw That"}
+                    const hnames = {
+                        "FISH": "Fishtopia",
+                        "MC": "Classic",
+                        "DRAW": "Draw That",
+                        "IMPOSTER": "Trust No One"
+                    }
                     document.getElementById("content").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
                     new bootstrap.Tooltip(document.getElementById("game-info"), {
                         "title": "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
@@ -59,10 +65,16 @@ chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
 });
 
 function enableaccordion(mode) {
-    let fish, mc, draw = false;
+    let fish, mc, draw, imposter = false;
     switch (mode) {
         case "FISH":
             fish = true;
+            mc = true;
+            break
+        case "IMPOSTER":
+            imposter = true
+            mc = true;
+            break
         case "MC":
             mc = true;
             break;
@@ -70,6 +82,7 @@ function enableaccordion(mode) {
             draw = true;
     }
     const warning = `<p class="text-warning"><i class="fa-solid fa-circle-question"></i> GimKit Lock-Pick did not detect that the current game is compatible with these settings. These most likely won't do anything.</p>`
+
     if (!mc) {
         document.querySelector("#mc-options > button").classList.add("accordion-button-muted");
         document.querySelector("#mc-options-body > .accordion-body")
@@ -83,6 +96,11 @@ function enableaccordion(mode) {
     if (!draw) {
         document.querySelector("#draw-options > button").classList.add("accordion-button-muted");
         document.querySelector("#draw-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
+    if (!imposter) {
+        document.querySelector("#imposter-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#imposter-options-body > .accordion-body")
             .insertAdjacentHTML("afterbegin", warning)
     }
 
@@ -130,7 +148,27 @@ function initvalues() {
         [mindelay, mindelaytext].forEach(e => {
             const min = dangerdelay.checked ? 0 : 500
             e.setAttribute("min", min.toString())
-            if (parseInt(e.value) < min) e.value = min.toString()
+            if (parseInt(e.value) < min) {
+                e.value = min.toString()
+                e.dispatchEvent(new Event("input"));
+            }
+        })
+    })
+    // amogus button
+    const susbody = document.getElementById("amongusrolesbody");
+    document.getElementById("amongusroles").addEventListener("click", () => {
+        askwindow(port, "imposters").then(roles => {
+            console.log(roles)
+            susbody.innerHTML = "";
+            const dead = `<i class="fa-solid fa-skull-crossbones"></i>`;
+            roles.forEach(role => {
+                susbody.insertAdjacentHTML('beforeend',
+                    `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>${role.name}</span>
+                                <span>${role.votedOff ? dead : ""}
+                                <i class="fa-solid fa-user-${role.role === "detective" ? "astronaut" : "alien"}"></i></span>
+                          </li>`)
+            })
         })
     })
     // general chrome-stored elements
