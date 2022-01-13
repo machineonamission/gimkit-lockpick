@@ -2,10 +2,12 @@ let gksettings = {}
 let gkanswering = false;
 
 const sleep = (milliseconds) => {
+    // async sleep
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
 function waitForCond(condfunc) {
+    // wait for condfunc() to return true a bit more intelligently by triggering with MutationObserver
     return new Promise(resolve => {
         if (condfunc()) {
             return resolve(condfunc());
@@ -42,6 +44,7 @@ function reactprops(elem) {
 }
 
 function reactfiber(elem) {
+    // get react data for DOM element
     for (let o in elem) {
         if (o.startsWith("__reactFiber")) {
             return elem[o]
@@ -52,6 +55,7 @@ function reactfiber(elem) {
 
 function mobbox() {
     // find the "MobXProvider" object which contains lots of game info that is very useful
+    // not always called that but the object seems to exist in all gamemodes
     let ginfo = reactsearch((e) => {
         return (typeof e.value.gameOptions === "object") || (typeof e.value.worldOptions === "object")
     })
@@ -63,6 +67,7 @@ function mobbox() {
 }
 
 function answertest(pr) {
+    // function for reactsearch() to find object with answers and submit func
     return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
 }
 
@@ -73,7 +78,7 @@ function answer() {
     let handler = props.onQuestionAnswered;
     // Q answers
     let answers = props.answers;
-    // find correct answer
+    // find correct answer, if theres multiple it should just choose the first
     let correct = answers.find(obj => {
         return obj.correct === true
     });
@@ -92,12 +97,16 @@ function answer() {
 }
 
 function answerdraw() {
+    // answer the drawmode
     let mb = mobbox()
+    // get answer
     const term = mb.draw.round.term;
+    // send directly to gimkit, visual changes are made on server response
     mb.engine.game.send("DRAW_MODE_GUESS", term)
 }
 
 function conttest(pr) {
+    // function to find continue button
     return typeof pr.continueToQuestions === "function"
 }
 
@@ -114,55 +123,61 @@ async function anscont() {
         // click it
         cont()
     }
-    // wait for function to exist
+    // wait for question to be answerable
     await waitForCond(() => {
         return 0 < reactsearch(answertest).length
     });
-    // call it
+    // answer it
     answer();
-    // wait for function to exist
+    // wait for continue button to appear
     await waitForCond(() => {
         return 0 < reactsearch(conttest).length
     });
-    // call it
+    // continue
     cont();
-    // sleep
+    // sleep predefined value
     await sleep(gksettings.delay);
 }
 
 function reactsearch(proptest, returnentirefiber = false) {
-    // search all fibers for a specific property which is passed to proptest(), return all which return true
+    // search all React fibers for a specific property which is passed to proptest(), return all which return true
     const searchid = crypto.randomUUID(); // give this search a random ID to assign to searched fibers
-    // run proptest() on all react fibers and return property objects for all who return true
     function searchfiber(fiber) {
+        // in case its passed nonsense
         if (!fiber) return false;
-        // this is WAY faster than adding them to a local list
+        // avoid repeat searching
+        // this is WAY faster than adding them to a local list and since the fibers are proper objects they remember
         if (fiber.searchid === searchid) return false;
+        // if fiber lacks props, ignore
         if (!fiber.memoizedProps || typeof fiber.memoizedProps !== "object") return false;
         try {
+            // check if props match test, add to matches if it do
             if (proptest(fiber.memoizedProps)) {
                 if (returnentirefiber) {
                     matches.push(fiber);
                 } else {
                     matches.push(fiber.memoizedProps);
                 }
-
             }
         } catch (e) {
-
+            // ignore exceptions
         } finally {
+            // mark fiber as searched
             fiber.searchid = searchid
         }
     }
 
     let matches = [];
+    // for every DOM element inside the #root (react object)
     Array.from(document.getElementById("root").getElementsByTagName('*')).forEach(e => {
-        // search all html element's fibers
+        // get fiber
         let fiber = reactfiber(e);
+        // just in case, make sure there is a fiber
         if (!fiber) return false;
+        // test it
         searchfiber(fiber);
         // some fibers don't have html elements and traversing down with fiber.child can fail. use fiber.return which
-        // goes up and always works to get almost all fibers
+        // goes up (parent) and always works to get almost all fibers
         do {
             if (!fiber.return) break;
             fiber = fiber.return;
@@ -177,6 +192,8 @@ function reactsearch(proptest, returnentirefiber = false) {
 
 function gimkitclick(elem) {
     // getEventListeners only works in chrome console
+    // send an object that looks like a click event to trick gimkit into thinking it was clicked
+    // superceded by directly calling functions in react props
     window.getEventListeners(document.getElementById("root")).click.forEach(listener => {
         listener.listener({
             type: "click", view: window, isTrusted: true, path: [elem], target: elem,
@@ -187,6 +204,7 @@ function gimkitclick(elem) {
 async function amongus() {
     // get all roles for amogus mode
     let ginfo = mobbox()
+    // weird proxy objects
     let people = _.cloneDeep(ginfo.imposter.people);
     // people might not be loaded especially when rejoining
     if (people.length) { // if loaded return gracefully
@@ -196,6 +214,7 @@ async function amongus() {
         ginfo.engine.game.send("IMPOSTER_MODE_REQUEST_PEOPLE", undefined)
         // send returns undefined and has no easy way to intercept callback
         while (true) {
+            // check every 100ms if people was updated, return if it was
             people = _.cloneDeep(ginfo.imposter.people);
             if (people.length) {
                 return people
@@ -203,69 +222,84 @@ async function amongus() {
             await sleep(100)
         }
     }
-    // engine.game.send("IMPOSTER_MODE_REQUEST_PEOPLE", undefined)
 }
 
 function drawb64(data) {
+    // draw base64 image on Draw It canvas
+    // find canvas
     const canv = reactsearch((e) => {
         return (e.canEdit === true && typeof e.canvasRef === "object")
     })[0]
+    // send image to gimkit
     canv.emitImage(data);
+    // draw on local canvas
     canv.canvasRef.current.drawImage(data);
-    return true
 }
 
 function fishteleport(pos) {
+    // fishtopia teleport
     mobbox().phaser.mainCharacter.movement.moveInstantly(pos)
 }
 
 function fishspawn() {
+    // fishtopia teleport to spawn
     let mb = mobbox()
     mb.phaser.mainCharacter.movement.moveInstantly(mb.me.spawnPosition)
 }
 
 function fishcollision(enabled) {
+    // fishtopia toggle colission
     let mb = mobbox()
+    // disables wall/water collision
     if (enabled) {
         mobbox().phaser.mainCharacter.collision.enableCollision()
     } else {
         mobbox().phaser.mainCharacter.collision.disableCollision()
     }
+    // disables all object collision
     mb.phaser.mainCharacter.body.body.checkCollision.none = !enabled
 }
 
 function fishspeed(s) {
+    // fishtopia movement speed
     mobbox().phaser.mainCharacter.physics.setMovementSpeed(s)
 }
 
 function fishzoom(z) {
+    // fishtopia camera zoom
     mobbox().phaser.scene.cameras.main.zoom = z
 }
 
 function fishremovedelay() {
+    // for every "device" (seems to be a phaser interactable object)
     mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.interactiveZones.isInteractive()).forEach(d => {
+        // set its delay to 0
         d.interactiveZones.setDelay(0)
     })
 }
 
 function fishrestoredelay() {
+    // for every device
     mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.interactiveZones.isInteractive()).forEach(d => {
+        // set to delay specified in options which seems to be original
         d.interactiveZones.setDelay(d.options.interactionDuration)
     })
 }
 
 function fishatgalaxy() {
+    // forcefully call the function to fish at one of the space cove things
     mobbox().phaser.scene.worldManager.devices.getDeviceById("Y5Mw3gytkmkflOrOXgEi8").interactiveZones.onInteraction()
 }
 
 function fishupgrade() {
     // requires 205 dolar
+    // press several upgrade buttons forcefully
     const upgrades = [
+        'PRvBBHYYn_E1gaC9elMLX', // no wait
         '249KQe7qAWdJob35wDp2j', // large pack
         'bS5z588nNdNVjKmZSu8R0', // expert rod
         'laPNTdJHJ9uKzRvXhqL7I', // 1.3x cash
         // can be achieved via cheating fr
-        // 'PRvBBHYYn_E1gaC9elMLX', // no wait
         // 'nIyk2qCiyPFIRFY0DJfQx', // bolt
     ]
     mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => upgrades.includes(n.id)).forEach(n => {
@@ -274,10 +308,12 @@ function fishupgrade() {
 }
 
 function fishcameraunlock() {
+    // unbound camera
     mobbox().phaser.scene.cameras.main.removeBounds()
 }
 
 function fishquery() {
+    // get fishtopia character data, called on popup initialization
     let mb = mobbox();
     return {
         zoom: mb.phaser.scene.cameras.main.zoom,
@@ -291,11 +327,13 @@ function gamemode() {
     // find the "MobXProvider" object which contains lots of game info that is very useful for this function
     let ginfo = mobbox()
     if (!ginfo) return "ERROR"
+    // attr which exists in all gamemodes except fishtopia
     if (ginfo.gameOptions) {
         // assignments have no special type and appear to only be the classic mode which makes sense
         if (ginfo.gameOptions.type === "assignment") return "MC"
+        // unique to each game
         switch (ginfo.gameOptions.specialGameType[0]) {
-            // MC: CLASSIC, TEAMS, IMPOSTER, HUMAN_ZOMBIE_DEFENDING_HOMEBASE, LAVA, THANOS, RICH, BOSS_BATTLE, HIDDEN, DRAINED
+            // multiple choice/classic
             // all of these gamemodes use the same interface as classic
             case "CLASSIC":
             case "TEAMS":
@@ -308,28 +346,28 @@ function gamemode() {
             case "DRAINED":
             case "PARDY": // very fancy but uses the same interface
                 return "MC"
+            // uses classic interface but also see imposter
             case "IMPOSTER":
                 return "IMPOSTER"
-            // other: DRAW
+            // draw game
             case "DRAW":
                 return "DRAW"
             default:
-                // this will probably cause problems in the future but idk if i want to set it to UNKNOWN
-                return ginfo.gameOptions.specialGameType[0];
+                // return ginfo.gameOptions.specialGameType[0];
+                return "UNKNOWN"
         }
     } else {
+        // prevent error
         if (ginfo.worldOptions && ginfo.worldOptions.itemOptions) {
             // i cant find anything that specifically says fishtopia, so im searching items for bait in case
             // they reuse the framework for future games. hopefully bait is unique to this game
-
-            // separate from MC because there is potential for fishtopia unique hacks like teleportation
             if (ginfo.worldOptions.itemOptions.some(o => o.id === "bait")) return "FISH"
         }
     }
     return "UNKNOWN"
 }
 
-// functions called by buttons
+// functions called by buttons that dont expect a return
 const triggers = {
     answerall: async () => {
         gkanswering = true;

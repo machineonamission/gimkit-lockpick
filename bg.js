@@ -1,4 +1,4 @@
-// set the icon to be enabled on gimkit.com and disabled everywhere else frfr
+// set the icon to be enabled on gimkit.com and disabled everywhere else
 let rule = {
     conditions: [
         new chrome.declarativeContent.PageStateMatcher({
