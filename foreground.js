@@ -50,6 +50,18 @@ function reactfiber(elem) {
     return null
 }
 
+function mobbox() {
+    // find the "MobXProvider" object which contains lots of game info that is very useful
+    let ginfo = reactsearch((e) => {
+        return (typeof e.value.gameOptions === "object") || (typeof e.value.worldOptions === "object")
+    })
+    if (ginfo.length && ginfo[0].value) {
+        return ginfo[0].value
+    } else {
+        return null
+    }
+}
+
 function answertest(pr) {
     return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
 }
@@ -77,7 +89,12 @@ function answer() {
         // if none are correct just choose the first one
         handler(answers[0]._id)
     }
+}
 
+function answerdraw() {
+    let mb = mobbox()
+    const term = mb.draw.round.term;
+    mb.engine.game.send("DRAW_MODE_GUESS", term)
 }
 
 function conttest(pr) {
@@ -169,10 +186,7 @@ function gimkitclick(elem) {
 
 async function amongus() {
     // get all roles for amogus mode
-    let ginfo = reactsearch((e) => {
-        return (typeof e.value.imposter === "object")
-    })
-    ginfo = ginfo[0].value
+    let ginfo = mobbox()
     let people = _.cloneDeep(ginfo.imposter.people);
     // people might not be loaded especially when rejoining
     if (people.length) { // if loaded return gracefully
@@ -201,19 +215,82 @@ function drawb64(data) {
     return true
 }
 
-// let gopts = reactsearch((e) => {return typeof e.value.phaser === "object"})[1].value
-// camera lock: gopts.phaser.scene.cameras.main._bounds (obj)
-// camera zoom: gopts.phaser.scene.cameras.main.zoom = 0.1 (float)
-// position: gopts.phaser.mainCharacter.body (.x, .y) (float)
-// disable collission: gopts.phaser.mainCharacter.body.body.checkCollision.none = true
+function fishteleport(pos) {
+    mobbox().phaser.mainCharacter.movement.moveInstantly(pos)
+}
+
+function fishspawn() {
+    let mb = mobbox()
+    mb.phaser.mainCharacter.movement.moveInstantly(mb.me.spawnPosition)
+}
+
+function fishcollision(enabled) {
+    let mb = mobbox()
+    if (enabled) {
+        mobbox().phaser.mainCharacter.collision.enableCollision()
+    } else {
+        mobbox().phaser.mainCharacter.collision.disableCollision()
+    }
+    mb.phaser.mainCharacter.body.body.checkCollision.none = !enabled
+}
+
+function fishspeed(s) {
+    mobbox().phaser.mainCharacter.physics.setMovementSpeed(s)
+}
+
+function fishzoom(z) {
+    mobbox().phaser.scene.cameras.main.zoom = z
+}
+
+function fishremovedelay() {
+    mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.interactiveZones.isInteractive()).forEach(d => {
+        d.interactiveZones.setDelay(0)
+    })
+}
+
+function fishrestoredelay() {
+    mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.interactiveZones.isInteractive()).forEach(d => {
+        d.interactiveZones.setDelay(d.options.interactionDuration)
+    })
+}
+
+function fishatgalaxy() {
+    mobbox().phaser.scene.worldManager.devices.getDeviceById("Y5Mw3gytkmkflOrOXgEi8").interactiveZones.onInteraction()
+}
+
+function fishupgrade() {
+    // requires 205 dolar
+    const upgrades = [
+        '249KQe7qAWdJob35wDp2j', // large pack
+        'bS5z588nNdNVjKmZSu8R0', // expert rod
+        'laPNTdJHJ9uKzRvXhqL7I', // 1.3x cash
+        // can be achieved via cheating fr
+        // 'PRvBBHYYn_E1gaC9elMLX', // no wait
+        // 'nIyk2qCiyPFIRFY0DJfQx', // bolt
+    ]
+    mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => upgrades.includes(n.id)).forEach(n => {
+        n.interactiveZones.onInteraction()
+    })
+}
+
+function fishcameraunlock() {
+    mobbox().phaser.scene.cameras.main.removeBounds()
+}
+
+function fishquery() {
+    let mb = mobbox();
+    return {
+        zoom: mb.phaser.scene.cameras.main.zoom,
+        speed: mb.phaser.mainCharacter.physics.movementSpeed,
+        x: mb.phaser.mainCharacter.movement.lastSafePosition.x,
+        y: mb.phaser.mainCharacter.movement.lastSafePosition.y,
+    }
+}
 
 function gamemode() {
     // find the "MobXProvider" object which contains lots of game info that is very useful for this function
-    let ginfo = reactsearch((e) => {
-        return (typeof e.value.gameOptions === "object") || (typeof e.value.worldOptions === "object")
-    })
-    if (!ginfo.length) return "ERROR"
-    ginfo = ginfo[0].value
+    let ginfo = mobbox()
+    if (!ginfo) return "ERROR"
     if (ginfo.gameOptions) {
         // assignments have no special type and appear to only be the classic mode which makes sense
         if (ginfo.gameOptions.type === "assignment") return "MC"
@@ -259,7 +336,8 @@ const triggers = {
         while (gkanswering) {
             await anscont()
         }
-    }, answerone: () => {
+    },
+    answerone: () => {
         // if cont button exists
         if (0 < reactsearch(conttest).length) {
             // click it
@@ -267,9 +345,25 @@ const triggers = {
         }
         //answer
         answer()
-    }, cancel: () => {
+    },
+    cancel: () => {
         gkanswering = false;
-    }
+    },
+    answerdraw: answerdraw,
+    fishspawn: fishspawn,
+    fishupgrade: fishupgrade,
+    fishatgalaxy: fishatgalaxy,
+    fishcollisionon: () => {
+        fishcollision(true)
+    },
+    fishcollisionoff: () => {
+        fishcollision(false)
+    },
+    fishrestoredelay: fishrestoredelay,
+    fishremovedelay: fishremovedelay,
+    fishcameraunlock: fishcameraunlock,
+    fishquery: fishquery
+
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
@@ -300,6 +394,15 @@ window.addEventListener("message", (event) => {
             case "draw":
                 resolve(drawb64(data))
                 break
+            case "fishpos":
+                resolve(fishteleport(data))
+                break;
+            case "fishspeed":
+                resolve(fishspeed(data))
+                break
+            case "fishzoom":
+                resolve(fishzoom(data))
+                break
             case "updatevalue":
                 // set config var
                 for (const [key, value] of Object.entries(data)) {
@@ -312,7 +415,7 @@ window.addEventListener("message", (event) => {
                 if (r && typeof r.then === "function") { // promise
                     r.then(resolve)
                 } else {
-                    return r
+                    resolve(r)
                 }
                 break
             default:

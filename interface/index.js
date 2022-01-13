@@ -56,6 +56,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                     break
             }
             enableaccordion(mode);
+            if (mode === "FISH") setupfishlink();
             initvalues()
         });
     } catch (e) {
@@ -108,6 +109,38 @@ function enableaccordion(mode) {
     document.getElementById("options").classList.remove("d-none")
 }
 
+function roundton(num, n) {
+    return +(Math.round((num + Number.EPSILON) + "e+" + n) + "e-" + n);
+}
+
+function setupfishlink() {
+    // only need to ask once because you cant move with the popup open
+    const x = document.getElementById("fishx");
+    const y = document.getElementById("fishy");
+    const speed = document.getElementById("fishspeed");
+    const zoom = document.getElementById("fishzoom");
+    askwindow(port, "trigger", "fishquery").then(data => {
+        x.value = roundton(data.x, 1)
+        y.value = roundton(data.y, 1)
+        speed.value = data.speed
+        zoom.value = data.zoom
+    })
+
+    function updatepos() {
+        askwindow(port, "fishpos", {x: parseFloat(x.value), y: parseFloat(y.value)})
+    }
+
+    x.addEventListener("input", updatepos)
+    y.addEventListener("input", updatepos)
+
+    speed.addEventListener("input", () => {
+        askwindow(port, "fishspeed", parseFloat(speed.value))
+    })
+    zoom.addEventListener("input", () => {
+        askwindow(port, "fishzoom", parseFloat(zoom.value))
+    })
+}
+
 function linksliderandnumber(slider, number) {
     // when slider is changed, change text value
     slider.addEventListener("input", () => {
@@ -117,7 +150,7 @@ function linksliderandnumber(slider, number) {
     number.addEventListener("input", () => {
         // parse min max and val (text)
         const min = parseInt(number.getAttribute("min"))
-        const max = parseInt(number.getAttribute("max"))
+        // const max = parseInt(number.getAttribute("max"))
         const val = parseInt(number.value)
         // assert correct values
         if (val < min) {
