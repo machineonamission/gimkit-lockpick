@@ -286,19 +286,68 @@ function fishrestoredelay() {
     })
 }
 
+function fishcollect() {
+    // for every device
+    mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.deviceOption.id === "droppedItem").forEach(d => {
+        d.interactiveZones.onInteraction()
+    })
+}
+
+async function fishallbait() {
+    const bait = mobbox().me.inventory.slots.get("bait").amount;
+    for (let i = 0; i < bait; i++) {
+        fishatgalaxy()
+        await sleep(500)
+    }
+}
+
+function fishsell() {
+    // forcefully call the function to fish at one of the space cove things
+    mobbox().phaser.scene.worldManager.devices.getDeviceById("3QhiGURlzHf7wQ3xVliTO").interactiveZones.onInteraction()
+}
+
 function fishatgalaxy() {
     // forcefully call the function to fish at one of the space cove things
     mobbox().phaser.scene.worldManager.devices.getDeviceById("Y5Mw3gytkmkflOrOXgEi8").interactiveZones.onInteraction()
+}
+
+let lastbaitobtain = 0;
+
+async function fishobtainbait() {
+    // if it was called too recently, do nothing
+    let now = Date.now()
+    if (now - lastbaitobtain <= gksettings.delay) {
+        return
+    }
+    mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
+    await waitForCond(() => {
+        return 0 < reactsearch(answertest).length
+    });
+    await answer()
+
+    function closetest(e) {
+        return typeof e.close === "function" && typeof e.questions === "object"
+    }
+
+    await waitForCond(() => {
+        return 0 < reactsearch(closetest).length
+    });
+    let close;
+    while (0 < (close = reactsearch(closetest)).length) {
+        close[0].close()
+        await sleep(100)
+    }
+    lastbaitobtain = Date.now();
 }
 
 function fishupgrade() {
     // requires 205 dolar
     // press several upgrade buttons forcefully
     const upgrades = [
-        'PRvBBHYYn_E1gaC9elMLX', // no wait
-        '249KQe7qAWdJob35wDp2j', // large pack
         'bS5z588nNdNVjKmZSu8R0', // expert rod
         'laPNTdJHJ9uKzRvXhqL7I', // 1.3x cash
+        '249KQe7qAWdJob35wDp2j', // large pack
+        'PRvBBHYYn_E1gaC9elMLX', // no wait
         // can be achieved via cheating fr
         // 'nIyk2qCiyPFIRFY0DJfQx', // bolt
     ]
@@ -306,7 +355,8 @@ function fishupgrade() {
         n.interactiveZones.onInteraction()
     })
 }
-// TODO: add fish buttons for sell, fish all bait, obtain bait, collect all fish
+
+
 function fishcameraunlock() {
     // unbound camera
     mobbox().phaser.scene.cameras.main.removeBounds()
@@ -433,7 +483,11 @@ const triggers = {
     fishrestoredelay: fishrestoredelay,
     fishremovedelay: fishremovedelay,
     fishcameraunlock: fishcameraunlock,
-    fishquery: fishquery
+    fishquery: fishquery,
+    fishcollect: fishcollect,
+    fishallbait: fishallbait,
+    fishsell: fishsell,
+    fishobtainbait: fishobtainbait
 
 }
 // handle messages from the extension
