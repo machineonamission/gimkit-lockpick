@@ -27,3 +27,7 @@ p {
 #min-delay {
     height: 100%;
 }
+
+.tt-big > .tooltip-inner {
+    max-width: 100% !important;
+}

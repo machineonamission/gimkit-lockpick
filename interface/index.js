@@ -114,6 +114,18 @@ function roundton(num, n) {
 }
 
 function setupfishlink() {
+    // warning about weird fishtopia handling
+    const fw = document.getElementById("fishtopia-warning")
+    fw.classList.remove("d-none")
+    let tt = new bootstrap.Tooltip(fw, {
+        "title": "Fishtopia handles question answering differently from the other gamemodes. When you answer a " +
+            "question, Fishtopia only sends GimKit the answer you chose and is expected to have synced the current " +
+            "question beforehand. Especially at high speeds, GimKit Lock-Pick may send the answer to a different " +
+            "question if the GimKit servers haven't send the correct question yet. Currently, there is no workaround " +
+            "other than to turn down the speed.",
+        "customClass": "tt-big"
+    })
+    console.log(tt)
     // only need to ask once because you cant move with the popup open
     const x = document.getElementById("fishx");
     const y = document.getElementById("fishy");
@@ -176,6 +188,9 @@ function initvalues() {
     linksliderandnumber(mindelay, mindelaytext)
     new bootstrap.Tooltip(document.querySelector("#danger-delay-div > label"), {
         "title": "GimKit listens for unnaturally fast answering and answering too many questions faster than 2/s will get you kicked."
+    })
+    new bootstrap.Tooltip(document.querySelector("#exp-zone"), {
+        "title": "These options are experiments and may get you kicked from the game."
     })
     const dangerdelay = document.getElementById("danger-delay")
     dangerdelay.addEventListener("input", () => {
