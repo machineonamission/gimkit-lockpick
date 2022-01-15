@@ -118,25 +118,31 @@ function cont() {
 }
 
 async function anscont() {
-    // if cont button exists
-    if (0 < reactsearch(conttest).length) {
-        // click it
-        cont()
+    // if answer button exists
+    if (0 < reactsearch(answertest).length) {
+        // ans it
+        answer()
     }
-    // wait for question to be answerable
-    await waitForCond(() => {
-        return 0 < reactsearch(answertest).length
-    });
-    // answer it
-    answer();
-    // wait for continue button to appear
+    // wait for continue button to exist
     await waitForCond(() => {
         return 0 < reactsearch(conttest).length
     });
     // continue
     cont();
+    // wait for question to exist
+    await waitForCond(() => {
+        return 0 < reactsearch(answertest).length
+    });
+    // answer it
+    answer();
     // sleep predefined value
     await sleep(gksettings.delay);
+
+    // the sleep occurs on the continue screen which is important in fishtopia
+    // for some godforsaken reason, the question ID is stored on gimkit's servers in fishtopia and you only send the
+    // answer. it seems to be properly synced and prepared during the continue phase and having it sleep on the answer
+    // screen causes it to get like half of the questions wrong. its a bit ugly but it works and plus the "+$231" screen
+    // is nicer anyways
 }
 
 function reactsearch(proptest, returnentirefiber = false) {
