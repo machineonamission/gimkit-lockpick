@@ -14,7 +14,10 @@
     "128": "logo128.png",
     "1000": "logo.png"
   },
-  "permissions": ["declarativeContent", "storage"],
+  "permissions": [
+    "declarativeContent",
+    "storage"
+  ],
   "host_permissions": [
     "*://*.gimkit.com/*"
   ],
