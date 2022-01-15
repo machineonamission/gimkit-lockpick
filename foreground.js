@@ -306,7 +306,7 @@ function fishupgrade() {
         n.interactiveZones.onInteraction()
     })
 }
-
+// TODO: add fish buttons for sell, fish all bait, obtain bait, collect all fish
 function fishcameraunlock() {
     // unbound camera
     mobbox().phaser.scene.cameras.main.removeBounds()
