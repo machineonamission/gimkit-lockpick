@@ -323,6 +323,29 @@ function fishquery() {
     }
 }
 
+function upgrade() {
+    let mb = mobbox()
+    let bal = mb.balance.balance;
+
+    let candidates = []
+    mb.upgrades.upgrades.filter(upg => upg.name !== "Insurance").forEach(upg => {
+        // biggest affordable level
+        let bestlevel = upg.levels.findLastIndex(lv => {
+            return (0 < lv.price) && (lv.price <= bal)
+        })
+        let currentlevel = mb.upgrades.upgradeLevels[_.camelCase(upg.name)] - 1
+        if (bestlevel > currentlevel) {  // candidate for upgrading is higher than the current level: we can upgrade
+            candidates.push({name: upg.name, price: upg.levels[bestlevel].price, level: bestlevel + 1})
+        }
+    })
+    if (candidates.length) {
+        let topcandidate = candidates.reduce((a, b) => a.price > b.price ? a : b)
+        mb.engine.game.send("UPGRADE_PURCHASED", {upgradeName: topcandidate.name, level: topcandidate.level})
+        return true
+    }
+    return false
+}
+
 function gamemode() {
     // find the "MobXProvider" object which contains lots of game info that is very useful for this function
     let ginfo = mobbox()
@@ -374,6 +397,16 @@ const triggers = {
         while (gkanswering) {
             await anscont()
         }
+    },
+    answerallandupgrade: async () => {
+        gkanswering = true;
+        while (gkanswering) {
+            upgrade()
+            await anscont()
+        }
+    },
+    upgrade: () => {
+        upgrade()
     },
     answerone: () => {
         // if cont button exists
