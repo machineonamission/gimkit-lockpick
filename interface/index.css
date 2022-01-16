@@ -31,3 +31,12 @@ p {
 .tt-big > .tooltip-inner {
     max-width: 100% !important;
 }
+
+.form-control {
+    color: #fff;
+    background-color: #303030;
+}
+
+.btn-group-vertical > .btn, .btn-group > .btn {
+    flex-basis: 0;
+}

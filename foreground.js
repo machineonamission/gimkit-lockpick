@@ -1,4 +1,4 @@
-let gksettings = {}
+let gksettings = {delay: 500}
 let gkanswering = false;
 
 const sleep = (milliseconds) => {
@@ -319,7 +319,7 @@ function fishatgalaxy() {
 
 let lastbaitobtain = 0;
 
-async function fishobtainbait() {
+async function fishobtainbait(toclose = true) {
     // if it was called too recently, do nothing
     let now = Date.now()
     if (now - lastbaitobtain <= gksettings.delay) {
@@ -330,19 +330,21 @@ async function fishobtainbait() {
         return 0 < reactsearch(answertest).length
     });
     await answer()
+    if (toclose) {
+        function closetest(e) {
+            return typeof e.close === "function" && typeof e.questions === "object"
+        }
 
-    function closetest(e) {
-        return typeof e.close === "function" && typeof e.questions === "object"
+        await waitForCond(() => {
+            return 0 < reactsearch(closetest).length
+        });
+        let close;
+        while (0 < (close = reactsearch(closetest)).length) {
+            close[0].close()
+            await sleep(100)
+        }
     }
 
-    await waitForCond(() => {
-        return 0 < reactsearch(closetest).length
-    });
-    let close;
-    while (0 < (close = reactsearch(closetest)).length) {
-        close[0].close()
-        await sleep(100)
-    }
     lastbaitobtain = Date.now();
 }
 
@@ -378,6 +380,56 @@ function fishquery() {
         y: mb.phaser.mainCharacter.movement.lastSafePosition.y,
     }
 }
+
+// TODO: this shit dont fuckin work!!!
+// let fishlooping = false;
+//
+// async function closeall() {
+//     // let mb = mobbox()
+//     // mb.phaser.scene.worldManager.devices.getDeviceById(mb.me.deviceUI.deviceId).deviceUI.close()
+//     function closetest(e) {
+//         return typeof e.close === "function"
+//     }
+//
+//     let close;
+//     while (0 < (close = reactsearch(closetest)).length) {
+//         close.forEach(c => c.close())
+//         await sleep(100)
+//     }
+// }
+//
+// async function fishloop() {
+//     do {
+//         try {
+//             mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
+//
+//         } catch (e) {
+//
+//         }
+//         await sleep(100)
+//     } while (0 < reactsearch(answertest).length)
+//     await sleep(500)
+//     for (const item of Array.from(Array(10))) {
+//         await anscont()
+//     }
+//     await closeall()
+//     await sleep(500)
+//     for (const item of Array.from(Array(10))) {
+//         fishatgalaxy()
+//     }
+//     await sleep(2000)
+//     fishsell()
+//     fishupgrade()
+//     await closeall()
+//     await sleep(3000)
+// }
+//
+// async function startfishloop() {
+//     fishlooping = true;
+//     while (fishlooping) {
+//         await fishloop()
+//     }
+// }
 
 function upgrade() {
     let mb = mobbox()
@@ -446,14 +498,16 @@ function gamemode() {
     return "UNKNOWN"
 }
 
+async function answerall() {
+    gkanswering = true;
+    while (gkanswering) {
+        await anscont()
+    }
+}
+
 // functions called by buttons that dont expect a return
 const triggers = {
-    answerall: async () => {
-        gkanswering = true;
-        while (gkanswering) {
-            await anscont()
-        }
-    },
+    answerall: answerall,
     answerallandupgrade: async () => {
         gkanswering = true;
         while (gkanswering) {
