@@ -105,6 +105,16 @@ function answerdraw() {
     mb.engine.game.send("DRAW_MODE_GUESS", term)
 }
 
+async function revealdraw() {
+    // cant find an easy way to safely override the function changing the terms
+    // theres a prop listener i can find with breakpoints but i cant find how to access it from global
+    let mb = mobbox()
+    while (mb.draw.status === "drawing") {
+        mb.draw.round.revealText = mb.draw.round.term;
+        await sleep(500);
+    }
+}
+
 function conttest(pr) {
     // function to find continue button
     return typeof pr.continueToQuestions === "function"
@@ -547,7 +557,8 @@ const triggers = {
     fishcollect: fishcollect,
     fishallbait: fishallbait,
     fishsell: fishsell,
-    fishobtainbait: fishobtainbait
+    fishobtainbait: fishobtainbait,
+    revealdraw: revealdraw,
 
 }
 // handle messages from the extension
