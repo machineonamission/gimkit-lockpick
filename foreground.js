@@ -108,6 +108,7 @@ function answerdraw() {
 async function revealdraw() {
     // cant find an easy way to safely override the function changing the terms
     // theres a prop listener i can find with breakpoints but i cant find how to access it from global
+    // TODO: cleaner implementation i beg of you
     let mb = mobbox()
     while (mb.draw.status === "drawing") {
         mb.draw.round.revealText = mb.draw.round.term;
