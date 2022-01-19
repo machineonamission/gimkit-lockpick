@@ -40,3 +40,19 @@ p {
 .btn-group-vertical > .btn, .btn-group > .btn {
     flex-basis: 0;
 }
+
+#bottom {
+    display: grid;
+    justify-content: space-around;
+    grid-auto-flow: column;
+    justify-items: center;
+}
+
+.link-light:focus, .link-light:hover {
+    color: #8a9197;
+}
+
+.link-light {
+    color: #fff;
+    text-decoration: none;
+}
