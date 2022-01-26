@@ -20,15 +20,17 @@ chrome.runtime.onConnect.addListener((port) => {
 
     // if its from the window, pass straight to popup
     function onwindowmessage(evt) {
-        if (evt.data.me === "receiver") {
+        if (evt.data.me === "receiver" && port) {
             port.postMessage(evt.data)
         }
     }
 
     window.addEventListener("message", onwindowmessage);
+
     // unregister events on port disconnect
     port.onDisconnect.addListener(port => {
-        port.onMessage.removeListener(onportmessage)
         window.removeEventListener("message", onwindowmessage)
+        port.onMessage.removeListener(onportmessage)
+        port = null;
     })
 })

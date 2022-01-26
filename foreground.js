@@ -326,6 +326,7 @@ function fishsell() {
 function fishatgalaxy() {
     // forcefully call the function to fish at one of the space cove things
     mobbox().phaser.scene.worldManager.devices.getDeviceById("Y5Mw3gytkmkflOrOXgEi8").interactiveZones.onInteraction()
+    // sendToServerDevice("interacted", undefined)
 }
 
 let lastbaitobtain = 0;

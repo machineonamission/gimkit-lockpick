@@ -9,9 +9,20 @@
 </head>
 <body>
 <div class="m-2">
-    <h1 id="title"><img class="icon" src="../logowhite.png" alt=""> Gimkit Lock-Pick</h1>
+    <h1 id="title" class="text-center"><img class="icon" src="../logowhite.png" alt=""> Gimkit Lock-Pick</h1>
     <div id="content">
         <p><i class="fa-solid fa-spinner-third fa-spin"></i> Loading...</p>
+    </div>
+    <div id="disclaimer d-none">
+        <h2>Disclaimer</h2>
+        <p>By clicking Agree or continuing to use this app, you acknowledge that Gimkit Lock-Pick is not responsible for
+            any consequences you may face if you are caught using the tool, which may be considered cheating, including
+            GimKit's own anti-cheat.</p>
+        <div class="d-grid gap-2">
+            <button class="btn btn-success" type="button">
+                <i class="fa-solid fa-check"></i> Agree
+            </button>
+        </div>
     </div>
     <div class="accordion d-none" id="options">
         <div class="accordion-item">
@@ -45,23 +56,23 @@
                             </label>
                         </div>
                         <!--TODO: some warning that upgrade wont work for all modes-->
-                        <button class="btn btn-block btn-warning" type="button" trigger="answerallandupgrade">
+                        <button class="btn btn-warning" type="button" trigger="answerallandupgrade">
                             <i class="fa-solid fa-bolt"></i> Auto-Answer All and Upgrade
                         </button>
-                        <button class="btn btn-block btn-success" type="button" trigger="answerall">
+                        <button class="btn btn-success" type="button" trigger="answerall">
                             <i class="fa-solid fa-check-double"></i> Auto-Answer All
                         </button>
                         <p class="text-warning d-none" id="fishtopia-warning">
                             <i class="fa-solid fa-triangle-exclamation"></i> Fishtopia questions aren't guaranteed to
                             answer correctly at high speed
                         </p>
-                        <button class="btn btn-block btn-info" type="button" trigger="upgrade">
+                        <button class="btn btn-info" type="button" trigger="upgrade">
                             <i class="fa-solid fa-store"></i> Buy Best Available Upgrades
                         </button>
-                        <button class="btn btn-block btn-primary" type="button" trigger="answerone">
+                        <button class="btn btn-primary" type="button" trigger="answerone">
                             <i class="fa-solid fa-check"></i> Auto-Answer One
                         </button>
-                        <button class="btn btn-block btn-danger" type="button" trigger="cancel">
+                        <button class="btn btn-danger" type="button" trigger="cancel">
                             <i class="fa-solid fa-xmark"></i> Cancel answering
                         </button>
                     </div>
@@ -87,7 +98,7 @@
                                        id="fishy">
                             </div>
                         </label>
-                        <button class="btn btn-block btn-primary" type="button" trigger="fishspawn">
+                        <button class="btn btn-primary" type="button" trigger="fishspawn">
                             <i class="fa-solid fa-house-person-return"></i> Return to Spawn
                         </button>
                         <label>
@@ -100,16 +111,16 @@
                             <input type="number" class="form-control" placeholder="zoom" step="50" value="310"
                                    id="fishspeed">
                         </label>
-                        <button class="btn btn-block btn-success" type="button" trigger="fishupgrade">
+                        <button class="btn btn-success" type="button" trigger="fishupgrade">
                             <i class="fa-solid fa-up"></i> Try to Upgrade Max
                         </button>
-                        <button class="btn btn-block btn-info" type="button" trigger="fishatgalaxy">
+                        <button class="btn btn-info" type="button" trigger="fishatgalaxy">
                             <i class="fa-solid fa-fishing-rod"></i> Fish At Cosmic Cove
                         </button>
-                        <button class="btn btn-block btn-success" type="button" trigger="fishsell">
+                        <button class="btn btn-success" type="button" trigger="fishsell">
                             <i class="fa-solid fa-money-bill-wave"></i> Sell Fish
                         </button>
-                        <button class="btn btn-block btn-info" type="button" trigger="fishcollect">
+                        <button class="btn btn-info" type="button" trigger="fishcollect">
                             <i class="fa-solid fa-fish-cooked"></i> Collect All Dropped Items
                         </button>
                         <div class="btn-group" role="group">
@@ -128,16 +139,16 @@
                                 <i class="fa-solid fa-gauge-max"></i> Disable Delay
                             </button>
                         </div>
-                        <button class="btn btn-block btn-info" type="button" trigger="fishcameraunlock">
+                        <button class="btn btn-info" type="button" trigger="fishcameraunlock">
                             <i class="fa-solid fa-camera-viewfinder"></i> Unlock Camera
                         </button>
                         <p class="text-warning text-center" id="exp-zone">
                             <i class="fa-solid fa-triangle-exclamation"></i> Experimental Zone
                         </p>
-                        <button class="btn btn-block btn-primary" type="button" trigger="fishobtainbait">
+                        <button class="btn btn-primary" type="button" trigger="fishobtainbait">
                             <i class="fa-solid fa-fish"></i> Get 1 Bait
                         </button>
-                        <button class="btn btn-block btn-warning" type="button" trigger="fishallbait">
+                        <button class="btn btn-warning" type="button" trigger="fishallbait">
                             <i class="fa-solid fa-fish-bones"></i> Fish All Bait At Cosmic Cove
                         </button>
                     </div>
@@ -155,7 +166,7 @@
             <div id="imposter-options-body" class="accordion-collapse collapse" aria-labelledby="draw-options">
                 <div class="accordion-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-block btn-success" type="button" id="amongusroles"><i
+                        <button class="btn btn-success" type="button" id="amongusroles"><i
                                 class="fa-solid fa-user-tag"></i> View All Roles
                         </button>
                         <ul id="amongusrolesbody" class="list-group">
@@ -175,7 +186,7 @@
                 <div class="accordion-body">
                     <div class="d-grid gap-2">
                         <input class="form-control" type="file" id="draw-file" accept="image/*">
-                        <button class="btn btn-block btn-primary" type="button" id="draw-upload">
+                        <button class="btn btn-primary" type="button" id="draw-upload">
                             <i class="fa-solid fa-pen-swirl"></i> Draw File on Canvas
                         </button>
                         <p><i class="fa-solid fa-circle-info"></i> GimKit may occasionally clear the canvas, just press
@@ -192,8 +203,10 @@
         </div>
     </div>
     <div id="bottom">
-        <a href="https://github.com/HexCodeFFF/gimkit-lockpick" class="link-light"><i class="fa-brands fa-github"></i> Source Code</a>
-        <a href="https://fontawesome.com/license" class="link-light"><i class="fa-brands fa-font-awesome-logo-full"></i> Font Awesome</a>
+        <a href="https://github.com/HexCodeFFF/gimkit-lockpick" class="link-light"><i class="fa-brands fa-github"></i>
+            Source Code</a>
+        <a href="https://fontawesome.com/license" class="link-light"><i class="fa-brands fa-font-awesome-logo-full"></i>
+            Font Awesome</a>
     </div>
     <!--TODO: warning about not being responsible for cheating n shit-->
 </div>
