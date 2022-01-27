@@ -4,6 +4,7 @@ window.addEventListener('click', function (e) {
         chrome.tabs.create({url: e.target.href})
     }
 })
+let vars = {}
 
 function askwindow(port, type, params = {}) {
     return new Promise(((resolve) => {
@@ -29,48 +30,52 @@ function askwindow(port, type, params = {}) {
 }
 
 let port
-chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-    try {
-        port = chrome.tabs.connect(tabs[0].id);
-        askwindow(port, "ping").then(console.log);
-        askwindow(port, "mode").then(mode => {
-            let cont = document.getElementById("content");
-            let md = null;
-            switch (mode) {
-                case "FISH":
-                case "MC":
-                case "DRAW":
-                case "IMPOSTER":
-                    md = mode;
-                    const hnames = {
-                        "FISH": "Fishtopia",
-                        "MC": "Classic",
-                        "DRAW": "Draw That",
-                        "IMPOSTER": "Trust No One"
-                    }
-                    document.getElementById("content").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
-                    new bootstrap.Tooltip(document.getElementById("game-info"), {
-                        "title": "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
-                    })
-                    break
-                case "ERROR":
-                    cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> I cannot determine what game is loaded. If you are in a game, please report this to the GitHub.</p>`;
-                    break
-                case "UNKNOWN":
-                default:
-                    console.warn("Game type", mode)
-                    cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> GimKit appears to have loaded a game, but I cannot identify what it is. If you are in a game, please report this to the GitHub.</p>`;
-                    break
-            }
-            enableaccordion(mode);
-            if (mode === "FISH") setupfishlink();
-            initvalues()
-        });
-    } catch (e) {
-        console.error(e)
-        document.getElementById("content").innerHTML = `<p class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Something went wrong connecting to GimKit.</p>`
-    }
-});
+
+function start() {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        try {
+            port = chrome.tabs.connect(tabs[0].id);
+            askwindow(port, "ping").then(console.log);
+            askwindow(port, "mode").then(mode => {
+                let cont = document.getElementById("loading");
+                let md = null;
+                switch (mode) {
+                    case "FISH":
+                    case "MC":
+                    case "DRAW":
+                    case "IMPOSTER":
+                        md = mode;
+                        const hnames = {
+                            "FISH": "Fishtopia",
+                            "MC": "Classic",
+                            "DRAW": "Draw That",
+                            "IMPOSTER": "Trust No One"
+                        }
+                        document.getElementById("loading").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
+                        new bootstrap.Tooltip(document.getElementById("game-info"), {
+                            "title": "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
+                        })
+                        break
+                    case "ERROR":
+                        cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> I cannot determine what game is loaded. If you are in a game, please report this to the GitHub.</p>`;
+                        break
+                    case "UNKNOWN":
+                    default:
+                        console.warn("Game type", mode)
+                        cont.innerHTML = `<p class="text-warning"><i class="fa-solid fa-circle-exclamation"></i> GimKit appears to have loaded a game, but I cannot identify what it is. If you are in a game, please report this to the GitHub.</p>`;
+                        break
+                }
+                enableaccordion(mode);
+                if (mode === "FISH") setupfishlink();
+                initvalues()
+            });
+        } catch (e) {
+            console.error(e)
+            document.getElementById("loading").innerHTML = `<p class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Something went wrong connecting to GimKit.</p>`
+        }
+    });
+}
+
 
 function enableaccordion(mode) {
     let fish, mc, draw, imposter = false;
@@ -247,6 +252,7 @@ function initvalues() {
     })
     chrome.storage.local.get(storagequery, items => {
         askwindow(port, "updatevalue", items)
+        vars = items;
         for (const [key, value] of Object.entries(items)) {
             let objs = document.querySelectorAll(`[storage-key="${key}"]`);
             if (!objs) return;
@@ -256,12 +262,14 @@ function initvalues() {
                     obj.addEventListener("input", () => {
                         askwindow(port, "updatevalue", {[key]: obj.checked})
                         chrome.storage.local.set({[key]: obj.checked})
+                        vars[key] = obj.checked;
                     })
                 } else {
                     obj.value = value;
                     obj.addEventListener("input", () => {
                         askwindow(port, "updatevalue", {[key]: obj.value})
                         chrome.storage.local.set({[key]: obj.value})
+                        vars[key] = obj.value;
                     })
                 }
             })
@@ -272,7 +280,32 @@ function initvalues() {
     document.querySelectorAll('[trigger]').forEach(e => {
         const key = e.getAttribute("trigger")
         e.addEventListener("click", () => {
-            askwindow(port, "trigger", key)
+            if (!e.classList.contains("disabled"))
+                askwindow(port, "trigger", key)
         })
     })
+    let ansone = document.getElementById("answerone");
+    ansone.addEventListener("click", () => {
+        if (!ansone.classList.contains("disabled")) {
+            ansone.classList.add("disabled")
+            setTimeout(() => {
+                ansone.classList.remove("disabled")
+            }, parseFloat(vars['delay']))
+        }
+    })
 }
+
+chrome.storage.local.get({"agreed": false}, items => {
+    let agreed = items["agreed"]
+    if (agreed) start()
+    else {
+        document.getElementById("loading").classList.add("d-none")
+        document.getElementById("disclaimer").classList.remove("d-none")
+        document.getElementById("agree").addEventListener("click", () => {
+            chrome.storage.local.set({agreed: true})
+            document.getElementById("loading").classList.remove("d-none")
+            document.getElementById("disclaimer").classList.add("d-none")
+            start()
+        })
+    }
+})

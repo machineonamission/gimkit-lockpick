@@ -10,16 +10,16 @@
 <body>
 <div class="m-2">
     <h1 id="title" class="text-center"><img class="icon" src="../logowhite.png" alt=""> Gimkit Lock-Pick</h1>
-    <div id="content">
+    <div id="loading">
         <p><i class="fa-solid fa-spinner-third fa-spin"></i> Loading...</p>
     </div>
-    <div id="disclaimer d-none">
+    <div id="disclaimer" class="d-none">
         <h2>Disclaimer</h2>
         <p>By clicking Agree or continuing to use this app, you acknowledge that Gimkit Lock-Pick is not responsible for
             any consequences you may face if you are caught using the tool, which may be considered cheating, including
             GimKit's own anti-cheat.</p>
         <div class="d-grid gap-2">
-            <button class="btn btn-success" type="button">
+            <button class="btn btn-success" type="button" id="agree">
                 <i class="fa-solid fa-check"></i> Agree
             </button>
         </div>
@@ -55,10 +55,6 @@
                                 <i class="fa-solid fa-triangle-exclamation"></i> Unrestrict minimum delay
                             </label>
                         </div>
-                        <!--TODO: some warning that upgrade wont work for all modes-->
-                        <button class="btn btn-warning" type="button" trigger="answerallandupgrade">
-                            <i class="fa-solid fa-bolt"></i> Auto-Answer All and Upgrade
-                        </button>
                         <button class="btn btn-success" type="button" trigger="answerall">
                             <i class="fa-solid fa-check-double"></i> Auto-Answer All
                         </button>
@@ -66,14 +62,20 @@
                             <i class="fa-solid fa-triangle-exclamation"></i> Fishtopia questions aren't guaranteed to
                             answer correctly at high speed
                         </p>
-                        <button class="btn btn-info" type="button" trigger="upgrade">
-                            <i class="fa-solid fa-store"></i> Buy Best Available Upgrades
-                        </button>
-                        <button class="btn btn-primary" type="button" trigger="answerone">
+                        <button class="btn btn-primary" type="button" trigger="answerone" id="answerone">
                             <i class="fa-solid fa-check"></i> Auto-Answer One
                         </button>
                         <button class="btn btn-danger" type="button" trigger="cancel">
                             <i class="fa-solid fa-xmark"></i> Cancel answering
+                        </button>
+                        <p class="text-warning">
+                            <i class="fa-solid fa-circle-info"></i> Not all classic-style gamemodes have upgrades.
+                        </p>
+                        <button class="btn btn-warning" type="button" trigger="answerallandupgrade">
+                            <i class="fa-solid fa-bolt"></i> Auto-Answer All and Upgrade
+                        </button>
+                        <button class="btn btn-info" type="button" trigger="upgrade">
+                            <i class="fa-solid fa-store"></i> Buy Best Available Upgrades
                         </button>
                     </div>
                 </div>
@@ -166,8 +168,8 @@
             <div id="imposter-options-body" class="accordion-collapse collapse" aria-labelledby="draw-options">
                 <div class="accordion-body">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success" type="button" id="amongusroles"><i
-                                class="fa-solid fa-user-tag"></i> View All Roles
+                        <button class="btn btn-success" type="button" id="amongusroles">
+                            <i class="fa-solid fa-user-tag"></i> View All Roles
                         </button>
                         <ul id="amongusrolesbody" class="list-group">
                         </ul>
@@ -191,24 +193,25 @@
                         </button>
                         <p><i class="fa-solid fa-circle-info"></i> GimKit may occasionally clear the canvas, just press
                             the button again to draw the file back.</p>
-                        <button class="btn btn-success btn-info" type="button" trigger="revealdraw"><i
-                                class="fa-solid fa-eye"></i> Reveal Term
+                        <button class="btn btn-success btn-info" type="button" trigger="revealdraw">
+                            <i class="fa-solid fa-eye"></i> Reveal Term
                         </button>
-                        <button class="btn btn-success btn-success" type="button" trigger="answerdraw"><i
-                                class="fa-solid fa-check"></i> Guess Correctly
+                        <button class="btn btn-success btn-success" type="button" trigger="answerdraw">
+                            <i class="fa-solid fa-check"></i> Guess Correctly
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="bottom">
-        <a href="https://github.com/HexCodeFFF/gimkit-lockpick" class="link-light"><i class="fa-brands fa-github"></i>
-            Source Code</a>
-        <a href="https://fontawesome.com/license" class="link-light"><i class="fa-brands fa-font-awesome-logo-full"></i>
-            Font Awesome</a>
+    <div id="bottom" class="mt-2">
+        <a href="https://github.com/HexCodeFFF/gimkit-lockpick" class="link-light">
+            <i class="fa-brands fa-github"></i> Source Code
+        </a>
+        <a href="https://fontawesome.com/license" class="link-light">
+            <i class="fa-brands fa-font-awesome-logo-full"></i> Font Awesome
+        </a>
     </div>
-    <!--TODO: warning about not being responsible for cheating n shit-->
 </div>
 <script src="bootstrap.bundle.min.js"></script>
 <script src="index.js"></script>
