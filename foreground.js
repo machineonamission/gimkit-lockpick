@@ -390,6 +390,41 @@ function fishquery() {
         speed: mb.phaser.mainCharacter.physics.movementSpeed,
         x: mb.phaser.mainCharacter.movement.lastSafePosition.x,
         y: mb.phaser.mainCharacter.movement.lastSafePosition.y,
+        camx: mb.phaser.scene.cameras.main.midPoint.x,
+        camy: mb.phaser.scene.cameras.main.midPoint.y,
+    }
+}
+
+// doesnt work
+// function tagnokick() {
+//     mobbox().phaser.scene.worldManager.devices.allDevices.filter(a => a.name === "kickOutOfBase").forEach(a => {
+//         a.input.disable();
+//         a.input.dispose();
+//     })
+// }
+
+function phaserstopfollow() {
+    mobbox().phaser.scene.cameras.main.stopFollow();
+}
+
+function phaserfollow() {
+    // TODO: add to gui
+    let mb = mobbox()
+    phaserstopfollow();
+    mb.phaser.scene.cameras.main.startFollow(mb.phaser.mainCharacter.body, false, 0.15, 0.15, undefined, undefined);
+}
+
+function phasercameragoto(pos) {
+    mobbox().phaser.scene.cameraHelper.goTo(pos)
+}
+
+
+async function tagall() {
+    for (let char of mobbox().phaser.scene.characterManager.characters) {
+        char = char[1]
+        if (char.indicator.isRunning && char.indicator.teamState != "ally") {
+            console.log(char.nametag.name)
+        }
     }
 }
 
@@ -501,10 +536,59 @@ function gamemode() {
         }
     } else {
         // prevent error
-        if (ginfo.worldOptions && ginfo.worldOptions.itemOptions) {
-            // i cant find anything that specifically says fishtopia, so im searching items for bait in case
-            // they reuse the framework for future games. hopefully bait is unique to this game
-            if (ginfo.worldOptions.itemOptions.some(o => o.id === "bait")) return "FISH"
+        if (ginfo.world && ginfo.world.terrain && ginfo.world.terrain.tiles) {
+            // best way i can think to identify world, make list of unique tiles
+            let uniquetiles = new Set()
+            for (const key of ginfo.world.terrain.tiles) {
+                uniquetiles.add(key[1].terrain)
+            }
+            const fishtiles = [
+                "Water Dark",
+                "Boardwalk",
+                "Exposed Boardwalk",
+                "Water",
+                "Purple Sand",
+                "Purple Grass",
+                "Water Purple",
+                "Sand",
+                "Space Rock",
+                "Water Space",
+                "Space",
+                "Grass",
+                "Marble Stone"
+            ]
+            const tagtiles = [
+                "Plastic Purple",
+                "Marble Stone",
+                "Marble Stone Dark",
+                "Cinema",
+                "Space Rock",
+                "Concrete",
+                "Grass",
+                "Plastic Red",
+                "Plastic Green",
+                "Gym Floor",
+                "Disco",
+                "Light Scraps"
+            ]
+            const flagtiles = [
+                "Light Scraps",
+                "Dark Scraps",
+                "Plastic Blue",
+                "Marble Stone",
+                "Marble Stone Dark",
+                "Grass"
+            ]
+            if (uniquetiles.has("Sand") && uniquetiles.has("Boardwalk") && uniquetiles.has("Water Space")) {
+                return "FISH"
+            }
+            if (uniquetiles.has("Cinema") && uniquetiles.has("Plastic Purple")) {
+                return "TAG"
+            }
+            if (uniquetiles.has("Light Scraps") && uniquetiles.has("Dark Scraps") && uniquetiles.has("Plastic Blue")) {
+                return "FLAG"
+            }
+            return "PHASER"
         }
     }
     return "UNKNOWN"
@@ -561,7 +645,8 @@ const triggers = {
     fishsell: fishsell,
     fishobtainbait: fishobtainbait,
     revealdraw: revealdraw,
-
+    phaserstopfollow: phaserstopfollow,
+    phaserfollow: phaserfollow,
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
@@ -594,6 +679,9 @@ window.addEventListener("message", (event) => {
                 break
             case "fishpos":
                 resolve(fishteleport(data))
+                break;
+            case "campos":
+                resolve(phasercameragoto(data))
                 break;
             case "fishspeed":
                 resolve(fishspeed(data))

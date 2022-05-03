@@ -41,19 +41,29 @@ function start() {
                 let md = null;
                 switch (mode) {
                     case "FISH":
+                    case "PHASER":
+                    case "TAG":
                     case "MC":
                     case "DRAW":
                     case "IMPOSTER":
+                    case "FLAG":
                         md = mode;
                         const hnames = {
                             "FISH": "Fishtopia",
+                            "TAG": "Tag: Domination",
+                            "PHASER": "Unknown Phaser Game",
                             "MC": "Classic",
                             "DRAW": "Draw That",
-                            "IMPOSTER": "Trust No One"
+                            "IMPOSTER": "Trust No One",
+                            "FLAG": "Capture the Flag"
                         }
                         document.getElementById("loading").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
+                        let title = "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
+                        if (mode === "PHASER") {
+                            title += " GimKit Lock-Pick has detected this is a phaser game (game engine used by Fishtopia), but is not sure what type of phaser game it is. Is this a new game?"
+                        }
                         new bootstrap.Tooltip(document.getElementById("game-info"), {
-                            "title": "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
+                            "title": title
                         })
                         break
                     case "ERROR":
@@ -66,7 +76,7 @@ function start() {
                         break
                 }
                 enableaccordion(mode);
-                if (mode === "FISH") setupfishlink();
+                if (["FISH", "TAG", "PHASER", "FLAG"].includes(mode)) setupfishlink();
                 initvalues()
             });
         } catch (e) {
@@ -78,11 +88,26 @@ function start() {
 
 
 function enableaccordion(mode) {
-    let fish, mc, draw, imposter = false;
+    let phaser, mc, draw, imposter, fish, tag, flag = false;
     switch (mode) {
         case "FISH":
             fish = true;
             mc = true;
+            phaser = true
+            break
+        case "TAG":
+            tag = true;
+            mc = true;
+            phaser = true
+            break
+        case "FLAG":
+            flag = true;
+            mc = true;
+            phaser = true;
+            break
+        case "PHASER":
+            mc = true
+            phaser = true
             break
         case "IMPOSTER":
             imposter = true
@@ -101,6 +126,16 @@ function enableaccordion(mode) {
         document.querySelector("#mc-options-body > .accordion-body")
             .insertAdjacentHTML("afterbegin", warning)
     }
+    if (!tag) {
+        document.querySelector("#tag-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#tag-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
+    if (!phaser) {
+        document.querySelector("#phaser-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#phaser-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
     if (!fish) {
         document.querySelector("#fish-options > button").classList.add("accordion-button-muted");
         document.querySelector("#fish-options-body > .accordion-body")
@@ -116,6 +151,11 @@ function enableaccordion(mode) {
         document.querySelector("#imposter-options-body > .accordion-body")
             .insertAdjacentHTML("afterbegin", warning)
     }
+    if (!flag) {
+        document.querySelector("#flag-options > button").classList.add("accordion-button-muted");
+        document.querySelector("#flag-options-body > .accordion-body")
+            .insertAdjacentHTML("afterbegin", warning)
+    }
 
 
     document.getElementById("options").classList.remove("d-none")
@@ -126,12 +166,13 @@ function roundton(num, n) {
 }
 
 function setupfishlink() {
-    // warning about weird fishtopia handling
+    // warning about weird Phaser handling
+    // named fish cause legacy and too lazy to change
     const fw = document.getElementById("fishtopia-warning")
     fw.classList.remove("d-none")
     let tt = new bootstrap.Tooltip(fw, {
-        "title": "Fishtopia handles question answering differently from the other gamemodes. When you answer a " +
-            "question, Fishtopia only sends GimKit the answer you chose and is expected to have synced the current " +
+        "title": "Phaser handles question answering differently from the other gamemodes. When you answer a " +
+            "question, Phaser only sends GimKit the answer you chose and is expected to have synced the current " +
             "question beforehand. Especially at high speeds, GimKit Lock-Pick may send the answer to a different " +
             "question if the GimKit servers haven't send the correct question yet. Currently, there is no workaround " +
             "other than to turn down the speed.",
@@ -143,11 +184,15 @@ function setupfishlink() {
     const y = document.getElementById("fishy");
     const speed = document.getElementById("fishspeed");
     const zoom = document.getElementById("fishzoom");
+    const camx = document.getElementById("camx");
+    const camy = document.getElementById("camy");
     askwindow(port, "trigger", "fishquery").then(data => {
         x.value = roundton(data.x, 1)
         y.value = roundton(data.y, 1)
         speed.value = data.speed
         zoom.value = data.zoom
+        camx.value = roundton(data.camx, 1)
+        camy.value = roundton(data.camy, 1)
     })
 
     function updatepos() {
@@ -156,6 +201,13 @@ function setupfishlink() {
 
     x.addEventListener("input", updatepos)
     y.addEventListener("input", updatepos)
+
+    function campos() {
+        askwindow(port, "campos", {x: parseFloat(camx.value), y: parseFloat(camy.value)})
+    }
+
+    camx.addEventListener("input", campos)
+    camy.addEventListener("input", campos)
 
     speed.addEventListener("input", () => {
         askwindow(port, "fishspeed", parseFloat(speed.value))
@@ -207,7 +259,7 @@ function initvalues() {
     const dangerdelay = document.getElementById("danger-delay")
     dangerdelay.addEventListener("input", () => {
         [mindelay, mindelaytext].forEach(e => {
-            const min = dangerdelay.checked ? 0 : 500
+            const min = dangerdelay.checked ? 0 : 1000
             e.setAttribute("min", min.toString())
             if (parseInt(e.value) < min) {
                 e.value = min.toString()
