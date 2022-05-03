@@ -59,7 +59,7 @@
                             <i class="fa-solid fa-check-double"></i> Auto-Answer All
                         </button>
                         <p class="text-warning d-none" id="fishtopia-warning">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Fishtopia questions aren't guaranteed to
+                            <i class="fa-solid fa-triangle-exclamation"></i> Phaser questions aren't guaranteed to
                             answer correctly at high speed
                         </p>
                         <button class="btn btn-primary" type="button" trigger="answerone" id="answerone">
@@ -115,6 +115,12 @@
                             <input type="number" class="form-control" placeholder="zoom" step="50" value="310"
                                    id="fishspeed">
                         </label>
+                        <div class="form-check form-switch" id="phaser-no-stop-div">
+                            <input class="form-check-input" type="checkbox" id="phaser-no-stop-delay" storage-key="phaser-no-stop">
+                            <label class="form-check-label" for="phaser-no-stop-delay">
+                                <i class="fa-solid fa-infinity"></i> Don't stop when out of energy
+                            </label>
+                        </div>
                         <button class="btn btn-info" type="button" trigger="fishcollect">
                             <i class="fa-solid fa-hand-holding-box"></i> Collect All Dropped Items
                         </button>

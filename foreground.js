@@ -1,4 +1,4 @@
-let gksettings = {delay: 500}
+let gksettings = {delay: 1000, "phaser-no-stop": false}
 let gkanswering = false;
 
 const sleep = (milliseconds) => {
@@ -68,16 +68,62 @@ function mobbox() {
 
 function answertest(pr) {
     // function for reactsearch() to find object with answers and submit func
+    //TODO: `answers` field is unfilled. did gimkit get sane?
     return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
+}
+
+function getanswers() {
+    let methods = [
+        function () { // new classic
+            return mobbox().questions.currentQuestion.answers;
+        },
+        function () { // new phaser
+            // questions are stored as string in the question overworld object in phaser
+            let ow_object = mobbox().phaser.scene.worldManager.devices.allDevices.filter(e => {
+                return e.deviceOption.id === "gimkitLiveQuestion"
+            })[0];
+            // parse json
+            let allanswers = JSON.parse(ow_object.state.questions);
+            // filter this object for the current question
+            return allanswers.find(a => {
+                return a._id === ow_object.currentQuestionId;
+            }).answers;
+        },
+        function () { // old approach (BROKEN)
+            let props = reactsearch(answertest)[0];
+            return props.answers;
+        }
+    ]
+    let errors = []
+    for (const method of methods) {
+        try {
+            return method()
+        } catch (e) {
+            errors.push(e)
+        }
+    }
+    console.error("unable to get questions", errors)
+}
+
+function answerobj(pr) {
+    // function for reactsearch() to find object with answers and submit func
+    // no idea what eas is but for some reason it's the correct one
+    return typeof pr.onQuestionAnswered === "function" && typeof pr.eas === "string";
 }
 
 function answer() {
     // get question container properties
-    let props = reactsearch(answertest)[0];
+    let props = reactsearch(answerobj);
+    if (!props.length) {
+        console.warn("no answer object found")
+        return
+    } else {
+        props = props[0]
+    }
     // handler to answer question
     let handler = props.onQuestionAnswered;
     // Q answers
-    let answers = props.answers;
+    let answers = getanswers();
     // find correct answer, if theres multiple it should just choose the first
     let correct = answers.find(obj => {
         return obj.correct === true
@@ -123,31 +169,36 @@ function conttest(pr) {
 
 function cont() {
     // find function
-    let props = reactsearch(conttest)[0];
-    // call it
-    props.continueToQuestions();
+    let props = reactsearch(conttest);
+    // if exists
+    if (props.length) {
+        // call it
+        props[0].continueToQuestions();
+    } else {
+        console.warn("no continue object found")
+    }
 }
 
 async function anscont() {
-    // if answer button exists
-    if (0 < reactsearch(answertest).length) {
-        // ans it
-        answer()
+    let answerexists = false;
+    let contexists = false;
+
+
+    // wait for either to exist
+    await waitForCond(() => {
+        contexists = 0 < reactsearch(conttest).length;
+        answerexists = 0 < reactsearch(answerobj).length;
+        return contexists || answerexists;
+    });
+    if (contexists) {
+        // continue
+        cont();
+    } else if (answerexists) {
+        // answer it
+        answer();
     }
-    // wait for continue button to exist
-    await waitForCond(() => {
-        return 0 < reactsearch(conttest).length
-    });
-    // continue
-    cont();
-    // wait for question to exist
-    await waitForCond(() => {
-        return 0 < reactsearch(answertest).length
-    });
-    // answer it
-    answer();
     // sleep predefined value
-    await sleep(gksettings.delay);
+    await sleep(gksettings.delay / 2);
 
     // the sleep occurs on the continue screen which is important in fishtopia
     // for some godforsaken reason, the question ID is stored on gimkit's servers in fishtopia and you only send the
@@ -282,6 +333,23 @@ function fishspeed(s) {
     mobbox().phaser.mainCharacter.physics.setMovementSpeed(s)
 }
 
+function phaserinterceptstop() {
+    // intercept movement speed stops
+    let phys = mobbox().phaser.mainCharacter.physics;
+    // copy original function
+    let origfunc = phys.setMovementSpeed;
+    // override phaser call
+    phys.setMovementSpeed = function (speed) {
+        // don't let orig function go through if it tries to freeze when not wanted
+        if (!(speed === 0 && gksettings["phaser-no-stop"])) {
+            origfunc(speed)
+        }
+    }
+    // if (phys.movementSpeed === 0 && gksettings["phaser-no-stop"]) {
+    //     phys.movementSpeed = 310;
+    // }
+}
+
 function fishzoom(z) {
     // fishtopia camera zoom
     mobbox().phaser.scene.cameras.main.zoom = z
@@ -339,7 +407,7 @@ async function fishobtainbait(toclose = true) {
     }
     mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
     await waitForCond(() => {
-        return 0 < reactsearch(answertest).length
+        return 0 < reactsearch(answerobj).length
     });
     await answer()
     if (toclose) {
@@ -596,6 +664,7 @@ function gamemode() {
 
 async function answerall() {
     gkanswering = true;
+    answer();
     while (gkanswering) {
         await anscont()
     }
@@ -606,6 +675,7 @@ const triggers = {
     answerall: answerall,
     answerallandupgrade: async () => {
         gkanswering = true;
+        answer();
         while (gkanswering) {
             upgrade()
             await anscont()
@@ -693,6 +763,10 @@ window.addEventListener("message", (event) => {
                 // set config var
                 for (const [key, value] of Object.entries(data)) {
                     gksettings[key] = value;
+                    // i dont care if this is jank im lazy
+                    if (key === "phaser-no-stop") {
+                        phaserinterceptstop();
+                    }
                 }
                 break;
             case "trigger":
