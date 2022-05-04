@@ -221,10 +221,35 @@
                                     <i class="fa-solid fa-shield-slash"></i> Disable Force-field
                                 </button>
                             </div>
-                            <p class="text-warning"><i class="fa-solid fa-warning"></i> Force-field does not work yet.
-                            </p>
                         </div>
-
+                        <label for="ff-delay" class="form-label mb-0"><i class="fa-solid fa-timer"></i>
+                            Force-field update rate (in ms)</label>
+                        <div class="row g-3">
+                            <div class="col-8">
+                                <input id="ff-delay" type="range" class="form-range" min="20" max="1000" step="1"
+                                       value="500" storage-key="ff-delay">
+                            </div>
+                            <div class="col-4">
+                                <input id="ff-delay-text" type="number" class="form-control" min="20" max="1000"
+                                       step="1"
+                                       aria-label="Force-field update rate (in ms)" value="500"
+                                       storage-key="ff-delay">
+                            </div>
+                        </div>
+                        <label for="ff-delay" class="form-label mb-0"><i class="fa-solid fa-timer"></i>
+                            Force-field radius</label>
+                        <div class="row g-3">
+                            <div class="col-8">
+                                <input id="ff-radius" type="range" class="form-range" min="20" max="1000" step="1"
+                                       value="400" storage-key="ff-radius">
+                            </div>
+                            <div class="col-4">
+                                <input id="ff-radius-text" type="number" class="form-control" min="20" max="1000"
+                                       step="1"
+                                       aria-label="Force-field update rate (in ms)" value="400"
+                                       storage-key="ff-radius">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

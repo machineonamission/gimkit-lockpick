@@ -1,4 +1,9 @@
-let gksettings = {delay: 1000, "phaser-no-stop": false}
+let gksettings = {
+    delay: 1000,
+    "phaser-no-stop": false,
+    "ff-delay": 500,
+    "ff-radius": 400
+}
 let gkanswering = false;
 let gkfield = false;
 
@@ -671,16 +676,51 @@ async function answerall() {
     }
 }
 
-function tagfield() {
+function naivedist(a, b) {
+    // pythagorean distance without sqrt useful for comparing distances
+
+
+    return a ** 2 + b ** 2
+}
+
+async function tagfield() {
     //TODO :still doesnt work
+    gkfield = true;
     let mb = mobbox();
-    for (let char of mb.phaser.scene.characterManager.characters) {
-        char = char[1]
-        if (char.indicator.teamState !== "ally") {
-            char.body.setCircle(800, 56.5, 38.5);
-            mb.phaser.scene.physics.world.addCollider(mb.phaser.mainCharacter.body, char.body);
-            // points.push([char.movement.targetX, char.movement.targetY])
+    const iterations = 10;
+    while (gkfield) {
+        let changesmade = false;
+        let me = {
+            x: mb.phaser.mainCharacter.movement.lastSafePosition.x,
+            y: mb.phaser.mainCharacter.movement.lastSafePosition.y
         }
+        let points = []
+        for (let char of mb.phaser.scene.characterManager.characters) {
+            char = char[1]
+            if (char.indicator.teamState !== "ally") {
+                points.push({
+                    x: char.movement.targetX,
+                    y: char.movement.targetY
+                })
+            }
+        }
+        for (let i = 0; i < iterations; i++) {
+            let closest = points.reduce((a, b) => {
+                return naivedist(me.x - a.x, me.y - a.y) < naivedist(me.x - b.x, me.y - b.y) ? a : b
+            });
+            let hypot = Math.hypot(me.x - closest.x, me.y - closest.y);
+            if (hypot >= gksettings["ff-radius"]) break
+            // basically move to closest edge of closest circle Proooooobably
+            changesmade = true
+            let ratio = (gksettings["ff-radius"] + 10) / hypot;
+            me.x = closest.x - ((closest.x - me.x) * ratio)
+            me.y = closest.y - ((closest.y - me.y) * ratio)
+        }
+        if (changesmade) {
+            fishteleport(me)
+        }
+
+        await sleep(gksettings["ff-delay"])
     }
 }
 

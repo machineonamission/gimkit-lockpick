@@ -232,7 +232,6 @@ function linksliderandnumber(slider, number) {
         } else {
             slider.value = val
         }
-
     });
 }
 
@@ -241,6 +240,8 @@ function initvalues() {
     const mindelay = document.getElementById('min-delay')
     const mindelaytext = document.getElementById('min-delay-text')
     linksliderandnumber(mindelay, mindelaytext)
+    linksliderandnumber(document.getElementById('ff-delay'), document.getElementById('ff-delay-text'))
+    linksliderandnumber(document.getElementById('ff-radius'), document.getElementById('ff-radius-text'))
     new bootstrap.Tooltip(document.querySelector("#danger-delay-div > label"), {
         "title": "GimKit listens for unnaturally fast answering. Answering too fast will get you kicked."
     })
