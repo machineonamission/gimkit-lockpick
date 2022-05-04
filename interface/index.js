@@ -88,7 +88,7 @@ function start() {
 
 
 function enableaccordion(mode) {
-    let phaser, mc, draw, imposter, fish, tag, flag = false;
+    let phaser, mc, draw, imposter, fish, tag = false;
     switch (mode) {
         case "FISH":
             fish = true;
@@ -96,14 +96,10 @@ function enableaccordion(mode) {
             phaser = true
             break
         case "TAG":
+        case "FLAG":
             tag = true;
             mc = true;
             phaser = true
-            break
-        case "FLAG":
-            flag = true;
-            mc = true;
-            phaser = true;
             break
         case "PHASER":
             mc = true
@@ -149,11 +145,6 @@ function enableaccordion(mode) {
     if (!imposter) {
         document.querySelector("#imposter-options > button").classList.add("accordion-button-muted");
         document.querySelector("#imposter-options-body > .accordion-body")
-            .insertAdjacentHTML("afterbegin", warning)
-    }
-    if (!flag) {
-        document.querySelector("#flag-options > button").classList.add("accordion-button-muted");
-        document.querySelector("#flag-options-body > .accordion-body")
             .insertAdjacentHTML("afterbegin", warning)
     }
 
@@ -251,7 +242,7 @@ function initvalues() {
     const mindelaytext = document.getElementById('min-delay-text')
     linksliderandnumber(mindelay, mindelaytext)
     new bootstrap.Tooltip(document.querySelector("#danger-delay-div > label"), {
-        "title": "GimKit listens for unnaturally fast answering and answering too many questions faster than 2/s will get you kicked."
+        "title": "GimKit listens for unnaturally fast answering. Answering too fast will get you kicked."
     })
     new bootstrap.Tooltip(document.querySelector("#exp-zone"), {
         "title": "These options are experiments and may get you kicked from the game."

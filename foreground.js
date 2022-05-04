@@ -1,5 +1,6 @@
 let gksettings = {delay: 1000, "phaser-no-stop": false}
 let gkanswering = false;
+let gkfield = false;
 
 const sleep = (milliseconds) => {
     // async sleep
@@ -670,6 +671,23 @@ async function answerall() {
     }
 }
 
+function tagfield() {
+    //TODO :still doesnt work
+    let mb = mobbox();
+    for (let char of mb.phaser.scene.characterManager.characters) {
+        char = char[1]
+        if (char.indicator.teamState !== "ally") {
+            char.body.setCircle(800, 56.5, 38.5);
+            mb.phaser.scene.physics.world.addCollider(mb.phaser.mainCharacter.body, char.body);
+            // points.push([char.movement.targetX, char.movement.targetY])
+        }
+    }
+}
+
+function tagnofield() {
+    gkfield = false;
+}
+
 // functions called by buttons that dont expect a return
 const triggers = {
     answerall: answerall,
@@ -717,6 +735,8 @@ const triggers = {
     revealdraw: revealdraw,
     phaserstopfollow: phaserstopfollow,
     phaserfollow: phaserfollow,
+    tagfield: tagfield,
+    tagnofield: tagnofield,
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
