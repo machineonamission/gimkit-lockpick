@@ -115,12 +115,7 @@
                             <input type="number" class="form-control" placeholder="zoom" step="50" value="310"
                                    id="fishspeed">
                         </label>
-                        <div class="form-check form-switch" id="phaser-no-stop-div">
-                            <input class="form-check-input" type="checkbox" id="phaser-no-stop-delay" storage-key="phaser-no-stop">
-                            <label class="form-check-label" for="phaser-no-stop-delay">
-                                <i class="fa-solid fa-infinity"></i> Don't stop when out of energy
-                            </label>
-                        </div>
+
                         <button class="btn btn-info" type="button" trigger="fishcollect">
                             <i class="fa-solid fa-hand-holding-box"></i> Collect All Dropped Items
                         </button>
@@ -208,15 +203,28 @@
             <div id="tag-options-body" class="accordion-collapse collapse" aria-labelledby="tag-options">
                 <div class="accordion-body">
                     <div class="d-grid gap-2">
-                        <p><i class="fa-solid fa-binary-lock"></i> These games are still being picked... check back later!</p>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-success" type="button" trigger="tagfield">
-                                <i class="fa-solid fa-shield"></i> Enable Force-field
-                            </button>
-                            <button class="btn btn-danger" type="button" trigger="tagnofield">
-                                <i class="fa-solid fa-shield-slash"></i> Disable Force-field
-                            </button>
+                        <p><i class="fa-solid fa-binary-lock"></i> These games are still being picked... check back
+                            later!</p>
+                        <div class="form-check form-switch" id="phaser-no-stop-div">
+                            <input class="form-check-input" type="checkbox" id="phaser-no-stop-delay"
+                                   storage-key="phaser-no-stop">
+                            <label class="form-check-label" for="phaser-no-stop-delay">
+                                <i class="fa-solid fa-infinity"></i> Don't stop when out of energy
+                            </label>
                         </div>
+                        <div>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success" type="button" trigger="tagfield">
+                                    <i class="fa-solid fa-shield"></i> Enable Force-field
+                                </button>
+                                <button class="btn btn-danger" type="button" trigger="tagnofield">
+                                    <i class="fa-solid fa-shield-slash"></i> Disable Force-field
+                                </button>
+                            </div>
+                            <p class="text-warning"><i class="fa-solid fa-warning"></i> Force-field does not work yet.
+                            </p>
+                        </div>
+
                     </div>
                 </div>
             </div>
