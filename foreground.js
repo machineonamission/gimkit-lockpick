@@ -6,6 +6,35 @@ let gksettings = {
 }
 let gkanswering = false;
 let gkfield = false;
+let alwaysontop = false;
+
+// let origAEL = EventTarget.prototype.addEventListener;
+// const blurevents = [
+//     "visibilitychange",
+//     "webkitvisibilitychange",
+//     "mozvisibilitychange",
+//     "msvisibilitychange",
+//     "blur",
+//     // "onMouseLeave"
+// ]
+// // document.visibilityState
+// EventTarget.prototype.addEventListener = function (type, listener, options) {
+//     if (blurevents.includes(type)) {
+//         console.log(this, type, listener, options);
+//         let newlistener = (...args) => {
+//             console.log(args);
+//             if (!alwaysontop) {
+//                 return listener(...args);
+//             } else {
+//                 args[0].stopImmediatePropagation();
+//                 args[0].stopPropagation();
+//             }
+//         }
+//         origAEL(type, newlistener, options);
+//     } else {
+//         origAEL(type, listener, options);
+//     }
+// }
 
 const sleep = (milliseconds) => {
     // async sleep
@@ -186,9 +215,12 @@ function cont() {
 }
 
 async function anscont() {
+    // debug for unhide()
+    const now = new Date();
+
+
     let answerexists = false;
     let contexists = false;
-
 
     // wait for either to exist
     await waitForCond(() => {
@@ -197,9 +229,11 @@ async function anscont() {
         return contexists || answerexists;
     });
     if (contexists) {
+        console.log(`trying to continue at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
         // continue
         cont();
     } else if (answerexists) {
+        console.log(`trying to answer at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
         // answer it
         answer();
     }
@@ -341,7 +375,11 @@ function fishspeed(s) {
 
 function phaserinterceptstop() {
     // intercept movement speed stops
-    let phys = mobbox().phaser.mainCharacter.physics;
+    let mb = mobbox();
+    if (!mb.hasOwnProperty("phaser")) {
+        return
+    }
+    let phys = mb.phaser.mainCharacter.physics;
     // copy original function
     let origfunc = phys.setMovementSpeed;
     // override phaser call
@@ -728,6 +766,28 @@ function tagnofield() {
     gkfield = false;
 }
 
+function unhide() {
+    // make gimkit think it's always on top
+    alwaysontop = true;
+    delete document.visibilityState;
+    Object.defineProperty(document, 'visibilityState', {
+        get: function () {
+            return "visible"
+        },
+        set: () => {
+        }
+    });
+    delete document.hidden;
+    Object.defineProperty(document, 'hidden', {
+        get: function () {
+            return false
+        },
+        set: () => {
+        }
+    });
+}
+
+
 // functions called by buttons that dont expect a return
 const triggers = {
     answerall: answerall,
@@ -777,6 +837,7 @@ const triggers = {
     phaserfollow: phaserfollow,
     tagfield: tagfield,
     tagnofield: tagnofield,
+    unhide: unhide
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
