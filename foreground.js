@@ -103,7 +103,6 @@ function mobbox() {
 
 function answertest(pr) {
     // function for reactsearch() to find object with answers and submit func
-    //TODO: `answers` field is unfilled. did gimkit get sane?
     return typeof pr.onQuestionAnswered === "function" && typeof pr.answers === "object"
 }
 
@@ -229,11 +228,11 @@ async function anscont() {
         return contexists || answerexists;
     });
     if (contexists) {
-        console.log(`trying to continue at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
+        // console.log(`trying to continue at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
         // continue
         cont();
     } else if (answerexists) {
-        console.log(`trying to answer at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
+        // console.log(`trying to answer at ${now.getMinutes()}:${now.getSeconds()}`, [document.visibilityState, document.hidden])
         // answer it
         answer();
     }
@@ -520,7 +519,6 @@ function phaserstopfollow() {
 }
 
 function phaserfollow() {
-    // TODO: add to gui
     let mb = mobbox()
     phaserstopfollow();
     mb.phaser.scene.cameras.main.startFollow(mb.phaser.mainCharacter.body, false, 0.15, 0.15, undefined, undefined);
@@ -722,7 +720,6 @@ function naivedist(a, b) {
 }
 
 async function tagfield() {
-    //TODO :still doesnt work
     gkfield = true;
     let mb = mobbox();
     const iterations = 10;
@@ -787,9 +784,107 @@ function unhide() {
     });
 }
 
+let origname;
+let namescrambling;
+
+function phasernameshow() {
+    if (origname) {
+        mobbox().phaser.mainCharacter.nametag.tag.text = origname;
+    }
+    namescrambling = false;
+}
+
+function phasernamehide() {
+    let mb = mobbox()
+    if (!origname) {
+        origname = mb.phaser.mainCharacter.nametag.tag.text;
+    }
+    mb.phaser.mainCharacter.nametag.tag.text = "";
+    namescrambling = false;
+    rainbowing = false;
+}
+
+function makeid(length) {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ';
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+async function phasernamescramble() {
+    if (!namescrambling) {
+        namescrambling = true;
+        if (!origname) {
+            origname = mobbox().phaser.mainCharacter.nametag.tag.text;
+        }
+        while (namescrambling) {
+            mobbox().phaser.mainCharacter.nametag.tag.text = makeid(origname.length);
+            await sleep(100);
+        }
+    }
+}
+
+
+// https://krazydad.com/tutorials/makecolors.php
+function RGB2Color(r, g, b) {
+    return 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+}
+
+// input: h in [0,1] and s,v in [0,1] - output: r,g,b in [0,266]
+function hsv2rgb(h, s, v) {
+    let f = (n, k = (n + (h * 360) / 60) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+    return [f(5) * 255, f(3) * 255, f(1) * 255];
+}
+
+function rainbowatpoint(i) {
+    // weird constant brightness rainbow, feels less jank
+    // from https://krazydad.com/tutorials/makecolors.php
+    const frequency = 2 * Math.PI;
+    let red = Math.sin(frequency * i) * 127.5 + 127.5;
+    let green = Math.sin((frequency * i) + (2 * Math.PI / 3)) * 127.5 + 127.5;
+    let blue = Math.sin((frequency * i) + (4 * Math.PI / 3)) * 127.5 + 127.5;
+
+    // traditional HSV
+    // let cols = hsv2rgb(i, 1, 1);
+    // let red = cols[0];
+    // let green = cols[1];
+    // let blue = cols[2];
+
+    return RGB2Color(red, green, blue)
+}
+
+
+let rainbowing = false;
+
+async function phaserrainbow() {
+    if (!rainbowing) {
+        rainbowing = true;
+        let rainbowindex = 0;
+        while (rainbowing) {
+            mobbox().phaser.mainCharacter.nametag.tag.setColor(rainbowatpoint(rainbowindex));
+            rainbowindex += 1 / 120;
+            await sleep(1000 / 60);
+        }
+    }
+}
+
+function phasernorainbow() {
+    rainbowing = false;
+    mobbox().phaser.mainCharacter.nametag.updateFontColor();
+}
+
+// TODO: skin change client side
 
 // functions called by buttons that dont expect a return
 const triggers = {
+    phaserrainbow: phaserrainbow,
+    phasernorainbow: phasernorainbow,
+    phasernameshow: phasernameshow,
+    phasernamehide: phasernamehide,
+    phasernamescramble: phasernamescramble,
     answerall: answerall,
     answerallandupgrade: async () => {
         gkanswering = true;
