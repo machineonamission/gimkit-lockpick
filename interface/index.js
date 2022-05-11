@@ -177,6 +177,7 @@ function setupfishlink() {
     const zoom = document.getElementById("fishzoom");
     const camx = document.getElementById("camx");
     const camy = document.getElementById("camy");
+    const skinid = document.getElementById("skin-id")
     askwindow(port, "trigger", "fishquery").then(data => {
         x.value = roundton(data.x, 1)
         y.value = roundton(data.y, 1)
@@ -184,6 +185,7 @@ function setupfishlink() {
         zoom.value = data.zoom
         camx.value = roundton(data.camx, 1)
         camy.value = roundton(data.camy, 1)
+        skinid.value = data.skin;
     })
 
     function updatepos() {
@@ -205,6 +207,12 @@ function setupfishlink() {
     })
     zoom.addEventListener("input", () => {
         askwindow(port, "fishzoom", parseFloat(zoom.value))
+    })
+
+    skinid.addEventListener("change", () => {
+        askwindow(port, "phaserskin", skinid.value).then(s => {
+            skinid.value = s;
+        })
     })
 }
 

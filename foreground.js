@@ -393,6 +393,12 @@ function phaserinterceptstop() {
     // }
 }
 
+function phaserskin(skin) {
+    let mb = mobbox()
+    mb.phaser.mainCharacter.skin.updateSkin(skin);
+    return mb.phaser.mainCharacter.skin.skinId;
+}
+
 function fishzoom(z) {
     // fishtopia camera zoom
     mobbox().phaser.scene.cameras.main.zoom = z
@@ -503,6 +509,7 @@ function fishquery() {
         y: mb.phaser.mainCharacter.movement.lastSafePosition.y,
         camx: mb.phaser.scene.cameras.main.midPoint.x,
         camy: mb.phaser.scene.cameras.main.midPoint.y,
+        skin: mb.phaser.mainCharacter.skin.skinId
     }
 }
 
@@ -537,6 +544,7 @@ async function tagall() {
         }
     }
 }
+
 
 // TODO: this shit dont fuckin work!!!
 // let fishlooping = false;
@@ -974,6 +982,9 @@ window.addEventListener("message", (event) => {
                 break
             case "fishzoom":
                 resolve(fishzoom(data))
+                break
+            case "phaserskin":
+                resolve(phaserskin(data))
                 break
             case "updatevalue":
                 // set config var
