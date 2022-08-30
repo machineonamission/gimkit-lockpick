@@ -165,34 +165,54 @@
                                 <i class="fa-solid fa-tag"></i> Normal Name
                             </button>
                         </div>
-                        <p class="text-warning text-center" id="broken">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Broken Options
-                        </p>
-                        <label>
-                            <i class="fa-solid fa-person-running"></i> Speed
-                            <input class="form-control" id="fishspeed" placeholder="zoom" step="50" type="number"
-                                   value="310">
-                        </label>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-success" trigger="fishcollisionon" type="button">
-                                <i class="fa-solid fa-block-brick"></i> Enable Collision
-                            </button>
-                            <button class="btn btn-danger" trigger="fishcollisionoff" type="button">
-                                <i class="fa-solid fa-block-brick-fire"></i> Disable Collision
-                            </button>
-                        </div>
-                        <label>
-                            <i class="fa-solid fa-location-dot"></i> Position
-                            <div class="input-group">
-                                <input class="form-control" id="fishx" placeholder="x" step="10" type="number"
-                                       value="0">
-                                <input class="form-control" id="fishy" placeholder="y" step="10" type="number"
-                                       value="0">
+                        <div class="accordion accordion-flush" id="fishbroken">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button collapsed text-warning" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#fishbrokencollapse" aria-expanded="false"
+                                            aria-controls="collapseOne" id="broken">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Broken Options
+                                    </button>
+                                </h2>
+                                <div id="fishbrokencollapse" class="accordion-collapse collapse"
+                                     aria-labelledby="headingOne" data-bs-parent="#fishbroken">
+                                    <div class="accordion-body">
+                                        <div class="d-grid gap-2">
+                                            <label>
+                                                <i class="fa-solid fa-person-running"></i> Speed
+                                                <input class="form-control" id="fishspeed" placeholder="zoom" step="50"
+                                                       type="number"
+                                                       value="310">
+                                            </label>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-success" trigger="fishcollisionon" type="button">
+                                                    <i class="fa-solid fa-block-brick"></i> Enable Collision
+                                                </button>
+                                                <button class="btn btn-danger" trigger="fishcollisionoff" type="button">
+                                                    <i class="fa-solid fa-block-brick-fire"></i> Disable Collision
+                                                </button>
+                                            </div>
+                                            <label>
+                                                <i class="fa-solid fa-location-dot"></i> Position
+                                                <div class="input-group">
+                                                    <input class="form-control" id="fishx" placeholder="x" step="10"
+                                                           type="number"
+                                                           value="0">
+                                                    <input class="form-control" id="fishy" placeholder="y" step="10"
+                                                           type="number"
+                                                           value="0">
+                                                </div>
+                                            </label>
+                                            <button class="btn btn-primary" trigger="fishspawn" type="button">
+                                                <i class="fa-solid fa-house-person-return"></i> Return to Spawn
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </label>
-                        <button class="btn btn-primary" trigger="fishspawn" type="button">
-                            <i class="fa-solid fa-house-person-return"></i> Return to Spawn
-                        </button>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -220,6 +240,9 @@
                         <button class="btn btn-success" type="button" trigger="fishsell">
                             <i class="fa-solid fa-money-bill-wave"></i> Sell Fish
                         </button>
+                        <button class="btn btn-success" type="button" trigger="fishsell">
+                            <i class="fa-solid fa-money-bills"></i> Collect And Sell All Fish On Ground
+                        </button>
 
                         <p class="text-warning text-center" id="exp-zone">
                             <i class="fa-solid fa-triangle-exclamation"></i> Experimental Zone
@@ -230,6 +253,14 @@
                         <button class="btn btn-warning" type="button" trigger="fishallbait">
                             <i class="fa-solid fa-fish-bones"></i> Fish All Bait At Lucky Lake
                         </button>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-success" trigger="fishloop" type="button">
+                                <i class="fa-solid fa-recycle"></i> Run Loop
+                            </button>
+                            <button class="btn btn-danger" trigger="fishstoploop" type="button">
+                                <i class="fa-solid fa-ban"></i> Stop Loop
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

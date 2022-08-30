@@ -5,6 +5,7 @@ let gksettings = {
     "ff-radius": 400
 }
 let gkanswering = false;
+let gkfishing = false;
 let gkfield = false;
 let alwaysontop = false;
 
@@ -449,6 +450,15 @@ async function fishallbait() {
     }
 }
 
+async function collectandsell() {
+    while (mobbox().phaser.scene.worldManager.devices.allDevices.filter(n => n.deviceOption.id === "droppedItem").length > 0) {
+        fishcollect()
+        await sleep(1000)
+        fishsell()
+        await sleep(1000)
+    }
+}
+
 function fishsell() {
     // forcefully call the function to fish at one of the space cove things
     mobbox().phaser.scene.worldManager.devices.getDeviceById("3QhiGURlzHf7wQ3xVliTO").interactiveZones.onInteraction()
@@ -463,7 +473,10 @@ function fishatgalaxy() {
 
 let lastbaitobtain = 0;
 
-async function fishopenanswer() {
+async function openquestions() {
+    if (reactsearch(answerobj).length > 0) {
+        return // already open
+    }
     mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
     await waitForCond(() => {
         return 0 < reactsearch(answerobj).length
@@ -476,25 +489,46 @@ async function fishobtainbait(toclose = true) {
     if (now - lastbaitobtain <= gksettings.delay) {
         return
     }
-    await fishopenanswer()
+    await openquestions()
     await answer()
     if (toclose) {
+        await sleep(500)
         function closetest(e) {
-            return typeof e.close === "function" && typeof e.questions === "object"
+            return typeof e.close === "function"
         }
-
-        await waitForCond(() => {
-            return 0 < reactsearch(closetest).length
-        });
-        let close;
-        while (0 < (close = reactsearch(closetest)).length) {
-            close[0].close()
+        while(reactsearch(closetest).length === 0) {
+            await sleep(100)
+        }
+        while(reactsearch(closetest).length > 0) {
+            reactsearch(closetest)[0].close()
             await sleep(100)
         }
     }
 
     lastbaitobtain = Date.now();
 }
+
+async function fishloop() {
+    gkfishing = true;
+    let xpath = "//span[text()='Close']";
+    let matchingElement;
+    while (gkfishing) {
+        await fishobtainbait(true)
+        await sleep(500)
+        fishatgalaxy()
+        await sleep(500)
+        matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        matchingElement.click()
+        await sleep(500)
+        await fishsell()
+        await sleep(500)
+    }
+}
+
+function fishstoploop() {
+    gkfishing = false;
+}
+
 
 function fishupgrade() {
     // requires 205 dolar
@@ -565,55 +599,6 @@ async function tagall() {
 }
 
 
-// TODO: this shit dont fuckin work!!!
-// let fishlooping = false;
-//
-// async function closeall() {
-//     // let mb = mobbox()
-//     // mb.phaser.scene.worldManager.devices.getDeviceById(mb.me.deviceUI.deviceId).deviceUI.close()
-//     function closetest(e) {
-//         return typeof e.close === "function"
-//     }
-//
-//     let close;
-//     while (0 < (close = reactsearch(closetest)).length) {
-//         close.forEach(c => c.close())
-//         await sleep(100)
-//     }
-// }
-//
-// async function fishloop() {
-//     do {
-//         try {
-//             mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
-//
-//         } catch (e) {
-//
-//         }
-//         await sleep(100)
-//     } while (0 < reactsearch(answertest).length)
-//     await sleep(500)
-//     for (const item of Array.from(Array(10))) {
-//         await anscont()
-//     }
-//     await closeall()
-//     await sleep(500)
-//     for (const item of Array.from(Array(10))) {
-//         fishatgalaxy()
-//     }
-//     await sleep(2000)
-//     fishsell()
-//     fishupgrade()
-//     await closeall()
-//     await sleep(3000)
-// }
-//
-// async function startfishloop() {
-//     fishlooping = true;
-//     while (fishlooping) {
-//         await fishloop()
-//     }
-// }
 
 function upgrade() {
     let mb = mobbox()
@@ -960,7 +945,10 @@ const triggers = {
     tagfield: tagfield,
     tagnofield: tagnofield,
     unhide: unhide,
-    openquestions:fishopenanswer
+    openquestions: openquestions,
+    collectandsell: collectandsell,
+    fishloop: fishloop,
+    fishstoploop: fishstoploop
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
