@@ -959,7 +959,8 @@ const triggers = {
     phaserfollow: phaserfollow,
     tagfield: tagfield,
     tagnofield: tagnofield,
-    unhide: unhide
+    unhide: unhide,
+    openquestions:fishopenanswer
 }
 // handle messages from the extension
 window.addEventListener("message", (event) => {
