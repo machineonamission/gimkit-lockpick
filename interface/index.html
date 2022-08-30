@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="bootstrap.min.css">
-    <link rel="stylesheet" href="font-awesome-pro-v6-6.0.0-beta3/css/all.min.css">
+    <script src="fontawesome/fontawesome.js"></script>
+    <script src="fontawesome/solid.js"></script>
+    <script src="fontawesome/brands.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -99,40 +101,18 @@
                     <div class="d-grid gap-2">
                         <p><i class="fa-solid fa-circle-info"></i> Phaser is the JS game engine used by GimKit for
                             "overworld" games where you can walk around.</p>
-                        <label>
-                            <i class="fa-solid fa-location-dot"></i> Position
-                            <div class="input-group">
-                                <input type="number" class="form-control" placeholder="x" value="0" step="10"
-                                       id="fishx">
-                                <input type="number" class="form-control" placeholder="y" value="0" step="10"
-                                       id="fishy">
-                            </div>
-                        </label>
-                        <button class="btn btn-primary" type="button" trigger="fishspawn">
-                            <i class="fa-solid fa-house-person-return"></i> Return to Spawn
-                        </button>
+
                         <label>
                             <i class="fa-solid fa-magnifying-glass"></i> Camera Zoom
                             <input type="number" class="form-control" placeholder="zoom" step="0.05" value="1.25"
                                    id="fishzoom">
                         </label>
-                        <label>
-                            <i class="fa-solid fa-person-running"></i> Speed
-                            <input type="number" class="form-control" placeholder="zoom" step="50" value="310"
-                                   id="fishspeed">
-                        </label>
+
 
                         <button class="btn btn-info" type="button" trigger="fishcollect">
                             <i class="fa-solid fa-hand-holding-box"></i> Collect All Dropped Items
                         </button>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-success" type="button" trigger="fishcollisionon">
-                                <i class="fa-solid fa-block-brick"></i> Enable Collision
-                            </button>
-                            <button class="btn btn-danger" type="button" trigger="fishcollisionoff">
-                                <i class="fa-solid fa-block-brick-fire"></i> Disable Collision
-                            </button>
-                        </div>
+
                         <div class="btn-group" role="group">
                             <button class="btn btn-success" type="button" trigger="fishrestoredelay">
                                 <i class="fa-solid fa-timer"></i> Restore Delay
@@ -185,6 +165,34 @@
                                 <i class="fa-solid fa-tag"></i> Normal Name
                             </button>
                         </div>
+                        <p class="text-warning text-center" id="broken">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Broken Options
+                        </p>
+                        <label>
+                            <i class="fa-solid fa-person-running"></i> Speed
+                            <input class="form-control" id="fishspeed" placeholder="zoom" step="50" type="number"
+                                   value="310">
+                        </label>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-success" trigger="fishcollisionon" type="button">
+                                <i class="fa-solid fa-block-brick"></i> Enable Collision
+                            </button>
+                            <button class="btn btn-danger" trigger="fishcollisionoff" type="button">
+                                <i class="fa-solid fa-block-brick-fire"></i> Disable Collision
+                            </button>
+                        </div>
+                        <label>
+                            <i class="fa-solid fa-location-dot"></i> Position
+                            <div class="input-group">
+                                <input class="form-control" id="fishx" placeholder="x" step="10" type="number"
+                                       value="0">
+                                <input class="form-control" id="fishy" placeholder="y" step="10" type="number"
+                                       value="0">
+                            </div>
+                        </label>
+                        <button class="btn btn-primary" trigger="fishspawn" type="button">
+                            <i class="fa-solid fa-house-person-return"></i> Return to Spawn
+                        </button>
                     </div>
                 </div>
             </div>
@@ -199,12 +207,15 @@
             <div id="fish-options-body" class="accordion-collapse collapse" aria-labelledby="fish-options">
                 <div class="accordion-body">
                     <div class="d-grid gap-2">
-
+                        <button class="btn btn-info" trigger="fishatgalaxy" type="button">
+                            <i class="fa-solid fa-fishing-rod"></i> Open Answer
+                        </button>
                         <button class="btn btn-success" type="button" trigger="fishupgrade">
                             <i class="fa-solid fa-up"></i> Try to Upgrade Max
                         </button>
+
                         <button class="btn btn-info" type="button" trigger="fishatgalaxy">
-                            <i class="fa-solid fa-fishing-rod"></i> Fish At Cosmic Cove
+                            <i class="fa-solid fa-fishing-rod"></i> Fish 1 At Lucky Lake
                         </button>
                         <button class="btn btn-success" type="button" trigger="fishsell">
                             <i class="fa-solid fa-money-bill-wave"></i> Sell Fish
@@ -217,7 +228,7 @@
                             <i class="fa-solid fa-fish"></i> Get 1 Bait
                         </button>
                         <button class="btn btn-warning" type="button" trigger="fishallbait">
-                            <i class="fa-solid fa-fish-bones"></i> Fish All Bait At Cosmic Cove
+                            <i class="fa-solid fa-fish-bones"></i> Fish All Bait At Lucky Lake
                         </button>
                     </div>
                 </div>

@@ -345,7 +345,12 @@ function drawb64(data) {
 
 function fishteleport(pos) {
     // fishtopia teleport
-    mobbox().phaser.mainCharacter.movement.moveInstantly(pos)
+    // mobbox().phaser.mainCharacter.movement.moveInstantly(pos)
+    // mobbox().phaser.mainCharacter.movement.setTargetX(pos.x)
+    // mobbox().phaser.mainCharacter.movement.setTargetY(pos.y)
+    mobbox().phaser.mainCharacter.body.setPosition(pos.x, pos.y)
+    // mobbox().phaser.mainCharacter.movement.moveToTargetPosition(16)
+    // mobbox().phaser.network.sendUpdate()
 }
 
 function fishspawn() {
@@ -354,17 +359,25 @@ function fishspawn() {
     mb.phaser.mainCharacter.movement.moveInstantly(mb.me.spawnPosition)
 }
 
+let bodies = []
+
 function fishcollision(enabled) {
     // fishtopia toggle colission
     let mb = mobbox()
     // disables wall/water collision
     if (enabled) {
-        mobbox().phaser.mainCharacter.collision.enableCollision()
+        // dont think this works but it doesnt matter because anticheat
+        mb.phaser.scene.worldManager.physics.bodiesManager.staticBodies = [...bodies]
     } else {
-        mobbox().phaser.mainCharacter.collision.disableCollision()
+        if (mb.phaser.scene.worldManager.physics.bodiesManager.staticBodies && !bodies) {
+            bodies = [...mb.phaser.scene.worldManager.physics.bodiesManager.staticBodies]
+        }
+        for (const body of mb.phaser.scene.worldManager.physics.bodiesManager.staticBodies) {
+            mb.phaser.scene.worldManager.physics.destroyBody(body)
+        }
     }
     // disables all object collision
-    mb.phaser.mainCharacter.body.body.checkCollision.none = !enabled
+    // mb.phaser.mainCharacter.body.body.checkCollision.none = !enabled
 }
 
 function fishspeed(s) {
@@ -393,9 +406,10 @@ function phaserinterceptstop() {
     // }
 }
 
-function phaserskin(skin) {
+async function phaserskin(skin) {
     let mb = mobbox()
     mb.phaser.mainCharacter.skin.updateSkin(skin);
+    await sleep(500);
     return mb.phaser.mainCharacter.skin.skinId;
 }
 
@@ -441,12 +455,20 @@ function fishsell() {
 }
 
 function fishatgalaxy() {
-    // forcefully call the function to fish at one of the space cove things
-    mobbox().phaser.scene.worldManager.devices.getDeviceById("Y5Mw3gytkmkflOrOXgEi8").interactiveZones.onInteraction()
+    // forcefully call the function to fish at lucky lake
+    // called galaxy cause galaxy cove whatever used to be the best
+    mobbox().phaser.scene.worldManager.devices.getDeviceById("Vhe-c_2os2_TjHBT4_2g3").interactiveZones.onInteraction()
     // sendToServerDevice("interacted", undefined)
 }
 
 let lastbaitobtain = 0;
+
+async function fishopenanswer() {
+    mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
+    await waitForCond(() => {
+        return 0 < reactsearch(answerobj).length
+    });
+}
 
 async function fishobtainbait(toclose = true) {
     // if it was called too recently, do nothing
@@ -454,10 +476,7 @@ async function fishobtainbait(toclose = true) {
     if (now - lastbaitobtain <= gksettings.delay) {
         return
     }
-    mobbox().phaser.scene.worldManager.devices.getDeviceById("7ip7k7AZc9ukQzRuILbRn").interactiveZones.onInteraction()
-    await waitForCond(() => {
-        return 0 < reactsearch(answerobj).length
-    });
+    await fishopenanswer()
     await answer()
     if (toclose) {
         function closetest(e) {
@@ -505,8 +524,8 @@ function fishquery() {
     return {
         zoom: mb.phaser.scene.cameras.main.zoom,
         speed: mb.phaser.mainCharacter.physics.movementSpeed,
-        x: mb.phaser.mainCharacter.movement.lastSafePosition.x,
-        y: mb.phaser.mainCharacter.movement.lastSafePosition.y,
+        x: mb.phaser.mainCharacter.body.x,
+        y: mb.phaser.mainCharacter.body.y,
         camx: mb.phaser.scene.cameras.main.midPoint.x,
         camy: mb.phaser.scene.cameras.main.midPoint.y,
         skin: mb.phaser.mainCharacter.skin.skinId
@@ -984,7 +1003,7 @@ window.addEventListener("message", (event) => {
                 resolve(fishzoom(data))
                 break
             case "phaserskin":
-                resolve(phaserskin(data))
+                phaserskin(data).then(resolve)
                 break
             case "updatevalue":
                 // set config var

@@ -57,7 +57,7 @@ function start() {
                             "IMPOSTER": "Trust No One",
                             "FLAG": "Capture the Flag"
                         }
-                        document.getElementById("loading").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup><i class="fa-solid fa-circle-info" id="game-info"></i></sup></p>`;
+                        document.getElementById("loading").innerHTML = `<p><i class="fa-solid fa-gamepad-modern"></i> Detected game: ${hnames[mode]} <sup id="game-info"><i class="fa-solid fa-circle-info"></i></sup></p>`;
                         let title = "GimKit Lock-Pick has attempted to detect the game type. Especially for Classic, many games use the same mechanics with a different coat of paint."
                         if (mode === "PHASER") {
                             title += " GimKit Lock-Pick has detected this is a phaser game (game engine used by Fishtopia), but is not sure what type of phaser game it is. Is this a new game?"
@@ -255,6 +255,9 @@ function initvalues() {
     })
     new bootstrap.Tooltip(document.querySelector("#exp-zone"), {
         "title": "These options are experiments and may get you kicked from the game."
+    })
+    new bootstrap.Tooltip(document.querySelector("#broken"), {
+        "title": "These options no longer function properly due to server-side anti-cheat."
     })
     const dangerdelay = document.getElementById("danger-delay")
     dangerdelay.addEventListener("input", () => {
